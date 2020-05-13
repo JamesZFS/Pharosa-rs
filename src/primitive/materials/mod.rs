@@ -1,9 +1,13 @@
 use super::*;
 
-mod simple;
+pub mod bsdf;
+pub mod texture;
 
-pub trait Material: Debug + DynClone {
-    // todo
+pub use bsdf::BSDF;
+pub use texture::Texture;
+
+#[derive(Debug)]
+pub struct Material<B: BSDF, T: Texture> {
+    pub bsdf: B,
+    pub texture: T
 }
-
-dyn_clone::clone_trait_object!(Material);

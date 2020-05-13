@@ -2,7 +2,7 @@ use crate::primitive::Primitive;
 use std::ops::{Deref, DerefMut};
 use crate::core::*;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Scene {
     primitives: Vec<Primitive>,
 }
@@ -26,6 +26,10 @@ impl Scene {
             }
         }
         isect
+    }
+
+    pub fn environ_map(&self, _ray_world: &Ray) -> Spectrum {
+        Spectrum::black() // todo
     }
 }
 

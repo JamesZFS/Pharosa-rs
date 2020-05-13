@@ -1,12 +1,4 @@
 use std::f64::consts::PI;
-use std::error::Error;
-
-mod core;
-mod primitive;
-mod camera;
-mod scene;
-mod utils;
-mod integrator;
 
 #[cfg(test)]
 mod test {
@@ -55,6 +47,7 @@ mod test {
     }
 }
 
+#[allow(dead_code)]
 fn vec() {
     use cgmath::*;
     let a = vec3(1., 0., 0.);
@@ -63,6 +56,7 @@ fn vec() {
     a.extend(1.0);
 }
 
+#[allow(dead_code)]
 fn transform() {
     use cgmath::*;
     let a = vec3(0., 0., 1.);
@@ -86,6 +80,7 @@ fn transform() {
     println!("{:?} -> {:?}", x, y);
 }
 
+#[allow(dead_code)]
 fn image() {
     use image::*;
     let img = open("./Madeline.jpeg").unwrap();

@@ -1,17 +1,24 @@
-use crate::core::*;
 use std::fmt::Debug;
+use std::rc::Rc;
+
 use dyn_clone::DynClone;
 
-use geometries::Geometry;
-use materials::Material;
+use geometries::*;
+pub use geometries::Sphere;
+use materials::*;
+pub use materials::{bsdf, texture};
+
+use crate::core::*;
 
 mod geometries;
 mod materials;
 
+type SimpleMaterial = Rc<Material<bsdf::Simple, texture::Uniform>>;
+
 #[derive(Debug, Clone)]
 pub struct Primitive {
-    pub geometry: Box<dyn Geometry>,
-    pub material: Box<dyn Material>,
+    pub geometry: Box<Sphere>,
+    pub material: SimpleMaterial,
     world_to_local: Matrix4f,
     local_to_world: Matrix4f,
 }
@@ -20,7 +27,7 @@ impl Primitive {
     /// Construct a Primitive.
     ///
     /// `transform`: a matrix to transform the geometry from origin to where it should locate in the world
-    pub fn new(geometry: Box<dyn Geometry>, material: Box<dyn Material>, transform: Matrix4f) -> Self {
+    pub fn new(geometry: Box<Sphere>, material: SimpleMaterial, transform: Matrix4f) -> Self {
         Self {
             geometry,
             material,

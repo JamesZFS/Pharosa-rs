@@ -1,10 +1,9 @@
 use super::*;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Ray {
     pub org: Point3f,
     pub dir: Vector3f,
-    // todo min/max time
 }
 
 impl Ray {

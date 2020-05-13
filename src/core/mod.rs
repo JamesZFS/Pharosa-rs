@@ -1,6 +1,7 @@
 pub use cgmath::*;
 pub use num_traits::float::{FloatConst, FloatCore};
 
+pub use film::*;
 pub use intersection::*;
 pub use ray::Ray;
 pub use spectrum::Spectrum;
@@ -9,7 +10,6 @@ use crate::primitive::Primitive;
 
 mod ray;
 mod intersection;
-mod sampler;
 mod spectrum;
 mod film;
 
@@ -20,6 +20,7 @@ pub type Real = f32;
 // #[cfg(feature = "float64")]
 // pub type Real = f64;
 
+pub type Radf = Rad<Real>;
 pub type Point2f = Point2<Real>;
 pub type Point3f = Point3<Real>;
 pub type Vector2f = Vector2<Real>;
@@ -42,9 +43,4 @@ impl TransformAny<Vector3f> for Matrix4f {
     fn transform(&self, src: &Vector3f) -> Vector3f {
         self.transform_vector(*src)
     }
-}
-
-pub trait Sampler {
-    fn next(&mut self) -> Real;
-    fn next2d(&mut self) -> Point2f;
 }

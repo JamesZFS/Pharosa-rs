@@ -5,6 +5,17 @@ use std::ops::{Add, Sub, Mul, Div, Deref, DerefMut};
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Spectrum(Vector3f);
 
+impl Spectrum {
+    pub fn new(r: Real, g: Real, b: Real) -> Self { Spectrum(vec3(r, g, b)) }
+    pub fn black() -> Self { Spectrum(Vector3::zero()) }
+}
+
+impl Default for Spectrum {
+    fn default() -> Self {
+        Spectrum::black()
+    }
+}
+
 impl Deref for Spectrum {
     type Target = Vector3f;
     fn deref(&self) -> &Self::Target { &self.0 }
@@ -12,10 +23,6 @@ impl Deref for Spectrum {
 
 impl DerefMut for Spectrum {
     fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
-}
-
-impl Spectrum {
-    pub fn new(r: Real, g: Real, b: Real) -> Self { Spectrum(vec3(r, g, b)) }
 }
 
 impl Add for Spectrum {
