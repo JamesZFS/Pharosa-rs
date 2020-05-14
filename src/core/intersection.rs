@@ -11,16 +11,6 @@ pub struct GeometryIntersection {
     pub t: Real,
 }
 
-impl Default for GeometryIntersection {
-    fn default() -> Self {
-        Self {
-            pos: Point3::origin(),
-            normal: Vector3::zero(),
-            t: Real::infinity(),
-        }
-    }
-}
-
 impl TransformAny<GeometryIntersection> for Matrix4f {
     fn transform(&self, src: &GeometryIntersection) -> GeometryIntersection {
         GeometryIntersection {

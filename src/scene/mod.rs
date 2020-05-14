@@ -35,14 +35,12 @@ impl Scene {
 
 impl Deref for Scene {
     type Target = Vec<Primitive>;
-    #[inline]
     fn deref(&self) -> &Self::Target {
         &self.primitives
     }
 }
 
 impl DerefMut for Scene {
-    #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.primitives
     }

@@ -3,11 +3,12 @@ use pharosa::scene::Scene;
 use pharosa::primitive::{Primitive, Sphere, Material, bsdf, texture};
 use pharosa::core::{Spectrum, Film};
 use cgmath::{Matrix4, vec3};
-use pharosa::camera::{Camera, Perspective, CameraInner};
+use pharosa::camera::{Camera, Perspective};
 use pharosa::sampler::{Independent, Fake};
 use std::rc::Rc;
-use pharosa::integrator::{self, Integrator};
-use image::{ImageBuffer, Rgb, Pixel};
+use pharosa::integrator::*;
+use std::time::Instant;
+use pharosa::utils::ToImageBuffer;
 
 fn setup_scene() -> Scene {
     let mut scene = Scene::new();
@@ -35,18 +36,14 @@ fn setup_camera() -> Camera<Perspective> {
 }
 
 fn main() {
+    let tic = Instant::now();
     let scene = setup_scene();
     let camera = setup_camera();
-    let mut sampler = Fake;
+    let mut sampler = Independent;
     let mut film = Film::new(1024, 768);
-    integrator::Position::render(&mut film, &camera, &scene, &mut sampler);
-    let converted = ImageBuffer::from_fn(1024, 768, |x, y| {
-        let pixel: RGBf = *film.get_pixel(x, y);
-        Rgb::<u8>([
-            (pixel.0[0] * 255.) as u8,
-            (pixel.0[1] * 255.) as u8,
-            (pixel.0[2] * 255.) as u8,
-        ])
-    });
-    converted.save("result-pos.png").unwrap();
+    let alg = SampleIntegrator { delegate: Normal, n_spp: 10 };
+    alg.render(&mut film, &camera, &scene, &mut sampler);
+    println!("Rendering done in {:?}", tic.elapsed());
+    film.to_image_buffer().save("result-normal.png").unwrap();
+    println!("Saved");
 }

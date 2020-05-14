@@ -7,6 +7,7 @@ pub use ray::Ray;
 pub use spectrum::Spectrum;
 
 use crate::primitive::Primitive;
+use std::ops::{Add, Sub, Mul};
 
 mod ray;
 mod intersection;
@@ -28,12 +29,12 @@ pub type Vector2f = Vector2<Real>;
 pub type Vector3f = Vector3<Real>;
 pub type Matrix4f = Matrix4<Real>;
 
-#[inline]
+#[inline(always)]
 pub fn pt3<S>(x: S, y: S, z: S) -> Point3<S> {
     Point3::new(x, y, z)
 }
 
-#[inline]
+#[inline(always)]
 pub fn pt2<S>(x: S, y: S) -> Point2<S> {
     Point2::new(x, y)
 }
@@ -54,4 +55,10 @@ impl TransformAny<Vector3f> for Matrix4f {
     fn transform(&self, src: &Vector3f) -> Vector3f {
         self.transform_vector(*src)
     }
+}
+
+/// Linear interpolate
+#[inline]
+pub fn lerp<S>(a: S, b: S, t: Real) -> S where S: Copy + Add<S, Output=S> + Sub<S, Output=S> + Mul<Real, Output=S> {
+    a + (b - a) * t
 }

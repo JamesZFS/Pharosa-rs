@@ -101,6 +101,6 @@ mod test {
                 hit_count += 1;
             }
         }
-        debug_assert_lt!(hit_count, HEIGHT);
+        assert_lt!(hit_count, HEIGHT);
     }
 }

@@ -1,12 +1,48 @@
 use super::*;
-use image::*;
+use crate::macros::*;
 
-pub type RGBf = Rgb<Real>;
+// pub type Film = ImageBuffer<Rgb<f32>, Vec<f32>>;
 
-impl From<Spectrum> for RGBf {
-    fn from(c: Spectrum) -> Self {
-        Self([c.x, c.y, c.z])
-    }
+pub struct Film {
+    width: u32,
+    height: u32,
+    /// row major
+    data: Vec<Spectrum>,
 }
 
-pub type Film = ImageBuffer<Rgb<f32>, Vec<f32>>;
+impl Film {
+    pub fn new(width: u32, height: u32) -> Self {
+        Self {
+            width,
+            height,
+            data: vec![Spectrum::black(); (width * height) as usize],
+        }
+    }
+    pub fn width(&self) -> u32 { self.width }
+    pub fn height(&self) -> u32 { self.height }
+    pub fn at(&self, x: u32, y: u32) -> &Spectrum {
+        unsafe { self.data.get_unchecked(self.index(x, y)) } // safety is guaranteed inside self.index
+    }
+    pub fn at_mut(&mut self, x: u32, y: u32) -> &mut Spectrum {
+        let index = self.index(x, y);
+        unsafe { self.data.get_unchecked_mut(index) }
+    }
+    pub unsafe fn at_unchecked(&self, x: u32, y: u32) -> &Spectrum {
+        self.data.get_unchecked(self.index_unchecked(x, y))
+    }
+    pub unsafe fn at_unchecked_mut(&mut self, x: u32, y: u32) -> &mut Spectrum {
+        let index = self.index_unchecked(x, y);
+        self.data.get_unchecked_mut(index)
+    }
+
+    #[inline]
+    fn index(&self, x: u32, y: u32) -> usize {
+        assert_le!(x, self.width, "Film index out of bounds!");
+        assert_le!(y, self.height, "Film index out of bounds!");
+        self.index_unchecked(x, y)
+    }
+    #[inline]
+    fn index_unchecked(&self, x: u32, y: u32) -> usize {
+        (x + y * self.width) as usize
+    }
+}
