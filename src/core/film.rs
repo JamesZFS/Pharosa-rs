@@ -9,4 +9,4 @@ impl From<Spectrum> for RGBf {
     }
 }
 
-pub type Film = ImageBuffer<RGBf, Vec<<RGBf as Pixel>::Subpixel>>;
+pub type Film = ImageBuffer<Rgb<f32>, Vec<f32>>;

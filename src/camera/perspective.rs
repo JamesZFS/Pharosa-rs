@@ -42,3 +42,65 @@ impl CameraInner for Perspective {
         (Ray::new(Point3::origin(), dir.normalize()), 1.0)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::macros::*;
+    use crate::scene::*;
+    use crate::sampler::{Fake, Sampler};
+    use crate::primitive::*;
+    use std::rc::Rc;
+
+    const WIDTH: u32 = 1024;
+    const HEIGHT: u32 = 768;
+
+    fn setup_scene() -> Scene {
+        let mut scene = Scene::new();
+        scene.push(Primitive::new_with_label(
+            "sphere".into(),
+            Box::new(Sphere::new(2.)),
+            Rc::new(Material { bsdf: bsdf::Simple::default(), texture: texture::Uniform::new(Spectrum::new(1., 0., 0.)) }),
+            Matrix4::from_translation(vec3(0., 0., 0.))));
+        scene
+    }
+
+    fn setup_camera(fovy: impl Into<Radf>) -> Camera<Perspective> {
+        let pers = Perspective::new(WIDTH, HEIGHT, fovy);
+        let camera = Camera::new(
+            pers,
+            Matrix4::look_at(
+                pt3(0., 0., -4.),
+                pt3(0., 0., 0.),
+                vec3(0., 1., 0.)),
+        );
+        camera
+    }
+
+    #[test]
+    fn fov_test() {
+        let scene = setup_scene();
+        let camera = setup_camera(Deg(60.)); // just tangent
+        let mut sampler = Fake;
+        let mut hit_count = 0;
+        let x = WIDTH / 2;
+        for y in 0..HEIGHT {
+            if let Some(its) = scene.nearest_hit(&camera.generate_ray(x, y, sampler.next2d()).0) {
+                assert_eq!(its.1.label, "sphere");
+                hit_count += 1;
+            }
+        }
+        assert_eq!(hit_count, HEIGHT);
+
+        let camera = setup_camera(Deg(61.));
+        let mut hit_count = 0;
+        let x = WIDTH / 2;
+        for y in 0..HEIGHT {
+            if let Some(its) = scene.nearest_hit(&camera.generate_ray(x, y, sampler.next2d()).0) {
+                assert_eq!(its.1.label, "sphere");
+                hit_count += 1;
+            }
+        }
+        assert_lt!(hit_count, HEIGHT);
+    }
+}

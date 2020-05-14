@@ -306,6 +306,7 @@ dependencies = [
  "derive_more 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "dyn-clone 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "image 0.23.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "more-asserts 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-traits 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",

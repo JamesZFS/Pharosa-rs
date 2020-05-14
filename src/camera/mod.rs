@@ -28,7 +28,7 @@ impl<C> Camera<C> where C: CameraInner {
     /// Sample a ray, return the world ray and its pdf
     pub fn generate_ray(&self, x: u32, y: u32, aperture_samp: Point2f) -> (Ray, Real) {
         let (ray, pdf) = self.inner.generate_ray(x, y, aperture_samp);
-        debug_assert_eq!(ray.dir.magnitude2(), 1.0);
+        debug_assert_approx!(ray.dir.magnitude(), 1.0);
         (self.local_to_world.transform(&ray), pdf)
     }
 
@@ -57,13 +57,13 @@ mod test {
         let camera = Camera::new(
             pers,
             Matrix4::look_at(
-                Point3::new(0., 0., -1.),
-                Point3::new(0., 0., 0.),
+                pt3(0., 0., -1.),
+                pt3(0., 0., 0.),
                 vec3(0., 1., 0.)),
         );
         let mut samp = sampler::Fake;
         let (ray, pdf) = camera.generate_ray(5, 5, samp.next2d());
-        assert_eq!(pdf, 1.0);
-        assert_eq!(ray, Ray::new(Point3::new(0., 0., -1.), Vector3::unit_z()))
+        assert_approx!(pdf, 1.0);
+        assert_eq!(ray, Ray::new(pt3(0., 0., -1.), Vector3::unit_z()))
     }
 }

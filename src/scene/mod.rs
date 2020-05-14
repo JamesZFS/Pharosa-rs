@@ -18,7 +18,7 @@ impl Scene {
             if let Some(new_isect) = new_isect {
                 match &isect {
                     None => isect = Some(Intersection(new_isect, prim)),
-                    Some(Intersection(geo_isect, hit))
+                    Some(Intersection(geo_isect, _hit))
                     // nearer intersect:
                     if new_isect.t < geo_isect.t => isect = Some(Intersection(new_isect, prim)),
                     _ => {}

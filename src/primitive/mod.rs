@@ -2,13 +2,15 @@ use std::fmt::Debug;
 use std::rc::Rc;
 
 use dyn_clone::DynClone;
+use lazy_static::*;
 
 use geometries::*;
 pub use geometries::Sphere;
-use materials::*;
+pub use materials::Material;
 pub use materials::{bsdf, texture};
 
 use crate::core::*;
+use std::sync::Mutex;
 
 mod geometries;
 mod materials;
@@ -17,10 +19,16 @@ type SimpleMaterial = Rc<Material<bsdf::Simple, texture::Uniform>>;
 
 #[derive(Debug, Clone)]
 pub struct Primitive {
+    /// for debug
+    pub label: String,
     pub geometry: Box<Sphere>,
     pub material: SimpleMaterial,
     world_to_local: Matrix4f,
     local_to_world: Matrix4f,
+}
+
+lazy_static! {
+    static ref PRIMITIVE_COUNT: Mutex<usize> = Mutex::new(0);
 }
 
 impl Primitive {
@@ -28,7 +36,15 @@ impl Primitive {
     ///
     /// `transform`: a matrix to transform the geometry from origin to where it should locate in the world
     pub fn new(geometry: Box<Sphere>, material: SimpleMaterial, transform: Matrix4f) -> Self {
+        let mut i = PRIMITIVE_COUNT.lock().unwrap();
+        Self::new_with_label(format!("Unnamed primitive #{}", (*i, *i += 1).0), geometry, material, transform)
+    }
+    /// Construct a Primitive with custom label.
+    ///
+    /// `transform`: a matrix to transform the geometry from origin to where it should locate in the world
+    pub fn new_with_label(label: String, geometry: Box<Sphere>, material: SimpleMaterial, transform: Matrix4f) -> Self {
         Self {
+            label,
             geometry,
             material,
             world_to_local: transform.inverse_transform()

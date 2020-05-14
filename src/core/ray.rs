@@ -7,10 +7,11 @@ pub struct Ray {
 }
 
 impl Ray {
-    #[inline]
-    pub fn new(org: Point3f, dir: Vector3f) -> Self { Self { org, dir } }
+    pub fn new(org: Point3f, dir: Vector3f) -> Self {
+        debug_assert_approx!(dir.magnitude(), 1.0);
+        Self { org, dir }
+    }
 
-    #[inline]
     pub fn transport(&self, t: Real) -> Point3f { self.org + self.dir * t }
 }
 

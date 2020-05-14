@@ -3,7 +3,7 @@ use super::*;
 #[derive(Debug, Clone)]      /// Wraps geometric info of the intersection and the hit primitive
 pub struct Intersection<'a>(pub GeometryIntersection, pub &'a Primitive);
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GeometryIntersection {
     pub pos: Point3f,
     pub normal: Vector3f,

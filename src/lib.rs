@@ -1,11 +1,10 @@
-mod core;
-mod primitive;
-mod camera;
-mod scene;
-mod utils;
-mod sampler;
-mod integrator;
+#[macro_use]
+pub mod macros;
 
-pub struct Renderer {
-
-}
+pub mod core;
+pub mod primitive;
+pub mod camera;
+pub mod utils;
+pub mod scene;
+pub mod sampler;
+pub mod integrator;

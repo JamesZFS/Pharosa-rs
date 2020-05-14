@@ -21,11 +21,22 @@ pub type Real = f32;
 // pub type Real = f64;
 
 pub type Radf = Rad<Real>;
+pub type Degf = Deg<Real>;
 pub type Point2f = Point2<Real>;
 pub type Point3f = Point3<Real>;
 pub type Vector2f = Vector2<Real>;
 pub type Vector3f = Vector3<Real>;
 pub type Matrix4f = Matrix4<Real>;
+
+#[inline]
+pub fn pt3<S>(x: S, y: S, z: S) -> Point3<S> {
+    Point3::new(x, y, z)
+}
+
+#[inline]
+pub fn pt2<S>(x: S, y: S) -> Point2<S> {
+    Point2::new(x, y)
+}
 
 pub trait TransformAny<T> {
     fn transform(&self, src: &T) -> T;

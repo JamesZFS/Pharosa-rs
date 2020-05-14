@@ -1,6 +1,6 @@
 pub use more_asserts::*;
 
-pub const APPROX_TOLERANCE: f64 = 1e-3;
+pub const APPROX_TOLERANCE: f64 = 1e-5;
 
 #[macro_export]
 macro_rules! assert_approx {
@@ -44,13 +44,17 @@ macro_rules! debug_assert_approx {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-
     #[test]
     fn approx_eq() {
         let a = 0.1;
         let b = 0.1000001;
         debug_assert_approx!(a, b,);
         assert_approx!(a, b, "not approx_eq!");
+    }
+
+    #[test]
+    #[should_panic]
+    fn approx_ne() {
+        assert_approx!(0.1, 0.2, "Ok!");
     }
 }
