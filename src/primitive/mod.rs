@@ -54,7 +54,10 @@ impl Primitive {
     }
     pub fn intersect(&self, ray_world: &Ray) -> Option<GeometryIntersection> {
         let ray = self.world_to_local.transform(ray_world);
-        self.geometry.intersect(&ray).map(|its| self.local_to_world.transform(&its))
+        self.geometry.intersect(&ray).map(|its| {
+            debug_assert_approx!(its.normal.magnitude(), 1.0);
+            self.local_to_world.transform(&its)
+        })
     }
     #[inline]
     pub fn world_to_local(&self) -> &Matrix4f {

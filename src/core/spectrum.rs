@@ -55,6 +55,18 @@ impl Div<Real> for Spectrum {
     fn div(self, rhs: Real) -> Self::Output { Spectrum(self.0 / rhs) }
 }
 
+impl From<Point3f> for Spectrum {
+    fn from(p: Point3f) -> Self {
+        Self::new(p.x, p.y, p.z)
+    }
+}
+
+impl From<Vector3f> for Spectrum {
+    fn from(v: Vector3f) -> Self {
+        Self::new(v.x, v.y, v.z)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

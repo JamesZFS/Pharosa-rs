@@ -3,9 +3,9 @@ use crate::camera::*;
 use crate::scene::Scene;
 use crate::sampler::Sampler;
 
-mod albedo;
+mod simple;
 
-pub use albedo::Albedo;
+pub use simple::*;
 
 pub trait Integrator {
     /// Render the scene, store the result in `film`

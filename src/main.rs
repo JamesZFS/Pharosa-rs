@@ -39,7 +39,7 @@ fn main() {
     let camera = setup_camera();
     let mut sampler = Fake;
     let mut film = Film::new(1024, 768);
-    integrator::Albedo::render(&mut film, &camera, &scene, &mut sampler);
+    integrator::Position::render(&mut film, &camera, &scene, &mut sampler);
     let converted = ImageBuffer::from_fn(1024, 768, |x, y| {
         let pixel: RGBf = *film.get_pixel(x, y);
         Rgb::<u8>([
@@ -48,5 +48,5 @@ fn main() {
             (pixel.0[2] * 255.) as u8,
         ])
     });
-    converted.save("result1.png").unwrap();
+    converted.save("result-pos.png").unwrap();
 }

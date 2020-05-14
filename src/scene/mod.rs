@@ -19,7 +19,7 @@ impl Scene {
                 match &isect {
                     None => isect = Some(Intersection(new_isect, prim)),
                     Some(Intersection(geo_isect, _hit))
-                    // nearer intersect:
+                    // update nearer intersect:
                     if new_isect.t < geo_isect.t => isect = Some(Intersection(new_isect, prim)),
                     _ => {}
                 }

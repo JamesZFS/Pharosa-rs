@@ -1,4 +1,5 @@
 use super::*;
+use crate::macros::*;
 
 #[derive(Debug, Clone)]
 pub struct Sphere {
@@ -7,8 +8,14 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new(radius: f32) -> Self {
+    pub fn new(radius: Real) -> Self {
+        debug_assert_gt!(radius, 0.);
         Sphere { radius, rad2: radius * radius }
+    }
+    pub fn set_radius(&mut self, new: Real) {
+        debug_assert_gt!(new, 0.);
+        self.radius = new;
+        self.rad2 = new * new;
     }
 }
 
@@ -28,7 +35,7 @@ impl Intersect for Sphere {
                 let pos = ray.transport(t);
                 Some(GeometryIntersection {
                     pos,
-                    normal: pos.to_vec(),
+                    normal: pos.to_vec().normalize(),
                     t,
                 })
             } else { // back?
@@ -37,7 +44,7 @@ impl Intersect for Sphere {
                     let pos = ray.transport(t);
                     Some(GeometryIntersection {
                         pos,
-                        normal: pos.to_vec(),
+                        normal: pos.to_vec().normalize(),
                         t,
                     })
                 } else {
