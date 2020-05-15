@@ -1,13 +1,14 @@
 use crate::*;
 use minifb::*;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use std::sync::{Arc, RwLock};
+use std::sync::atomic::{AtomicBool, Ordering};
+use crate::utils::{ToHexColor, ToImageBuffer, GammaCorrection};
+use std::thread::spawn;
 
 mod config;
 
 use config::*;
-use crate::utils::ToHexColor;
-use std::thread::spawn;
 
 pub fn gui() {
     let window = setup_window();
@@ -16,6 +17,7 @@ pub fn gui() {
         camera: setup_camera(),
         sampler: sampler::Independent,
         film: Arc::new(RwLock::new(Film::new(WIDTH, HEIGHT))),
+        progress: Arc::new(Default::default())
     };
     let integrator = setup_integrator();
     event_loop(window, context, integrator);
@@ -26,45 +28,58 @@ fn event_loop(mut window: Window, mut context: Context<impl Geometry, impl BSDF,
     let mut buffer = Vec::with_capacity(context.film.read().unwrap().size());
     window.set_title(PHAROSA);
 
-    let spp = Arc::new(RwLock::new(0u32));
+    let progress = context.progress.clone();
+    let kernel_is_done = Arc::new(AtomicBool::new(false));
     let film = context.film.clone();
     let kernel;
-    { // create the kernel thread
-        let spp = spp.clone();
+    { // spawn the kernel thread
+        let kernel_is_done = kernel_is_done.clone();
+        // do rendering in 'kernel' thread
         kernel = spawn(move || {
             println!("Kernel started.");
-            // do rendering in 'kernel' thread
-            loop {
-                integrator.render(&mut context);
-                *spp.write().unwrap() += 1;
-            }
-            println!("Kernel finished.");
+            let tic = Instant::now();
+            integrator.render(&mut context);
+            println!("Kernel finished in {:?}", tic.elapsed());
+            kernel_is_done.store(true, Ordering::Relaxed);
         });
     }
 
     while window.is_open() {
-        window.set_title(&format!("{} spp = {}", PHAROSA, spp.read().unwrap()));
+        if kernel_is_done.load(Ordering::Relaxed) {
+            window.set_title(&format!("{} (done)", PHAROSA));
+        } else {
+            window.set_title(&format!("{} (rendering {:.1}% ...)", PHAROSA, *progress.read().unwrap() * 100.));
+        }
 
         // refresh display
-        buffer.clear();
-        buffer.extend(film.read().unwrap().to_raw().iter().map(|s| s.to_hex_color()));
+        update_buffer(&mut buffer, &film);
         window.update_with_buffer(&buffer, WIDTH as usize, HEIGHT as usize).unwrap();
 
         // process menu events
-        // window.is_menu_pressed().map(|menu_id| {
-        //     match menu_id {
-        //         LOAD_SCENE_BTN => unimplemented!(),
-        //         START_BTN => {
-        //             println!("Start clicked!");
-        //         }
-        //         PAUSE_BTN => unimplemented!(),
-        //         SAVE_BTN => unimplemented!(),
-        //         _ => unreachable!()
-        //     }
-        // });
+        window.is_menu_pressed().map(|menu_id| {
+            match menu_id {
+                LOAD_SCENE_BTN => unimplemented!(),
+                START_BTN => {
+                    println!("Start clicked!");
+                }
+                PAUSE_BTN => unimplemented!(),
+                SAVE_BTN => save(&film),
+                _ => unreachable!()
+            }
+        });
     }
     println!("Waiting for kernel to finish...");
     kernel.join().unwrap();
+}
+
+fn update_buffer(buffer: &mut Vec<u32>, film: &Arc<RwLock<Film>>) {
+    buffer.clear();
+    buffer.extend(film.read().unwrap().to_raw().iter().map(|s| s.gamma_correction().to_hex_color()));
+}
+
+fn save(film: &Arc<RwLock<Film>>) {
+    film.read().unwrap().to_image_buffer().save(SAVE_PATH).unwrap();
+    println!("Result saved to '{}'", SAVE_PATH);
 }
 
 fn setup_window() -> Window {
@@ -117,5 +132,5 @@ fn setup_camera() -> Camera<impl CameraInner> {
 }
 
 fn setup_integrator() -> impl Integrator {
-    integrator::SampleIntegrator { n_spp: 1, delegate: integrator::Normal }
+    integrator::SampleIntegrator { n_spp: 10, delegate: integrator::Normal }
 }

@@ -4,7 +4,8 @@
 use std::time::Instant;
 
 fn main() {
+    println!("Pharosa {}\n", env!("CARGO_PKG_VERSION"));
     let tic = Instant::now();
     pharosa::gui();
-    println!("Program finished in {:?}", tic.elapsed());
+    println!("\nProgram finished in {:?}", tic.elapsed());
 }

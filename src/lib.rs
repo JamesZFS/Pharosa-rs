@@ -28,4 +28,6 @@ pub struct Context<G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler>
     pub sampler: S,
     /// `film` is read by gui thread, written by kernel thread
     pub film: Arc<RwLock<Film>>,
+    /// To indicate rendering progress, read by gui, written by kernel
+    pub progress: Arc<RwLock<Float>>,
 }

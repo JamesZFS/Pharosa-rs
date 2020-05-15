@@ -30,35 +30,30 @@ impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + D
     fn render<G, B, T, C, S>(&self, context: &mut Context<G, B, T, C, S>)
         where G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler {
         // unpack
-        let Context { scene, camera, sampler, film } = context;
+        let Context { scene, camera, sampler, film, progress } = context;
         let (height, width) = {
             let film = film.read().unwrap();
             (film.height(), film.width())
         };
-        for y in 0..height {
-            for x in 0..width {
-                for spp in 0..self.n_spp {
+        *progress.write().unwrap() = 0.;
+        for spp in 0..self.n_spp {
+            for y in 0..height {
+                for x in 0..width {
                     let (ray, pdf) = camera.generate_ray(x, y, sampler.next2d());
                     let radiance = self.delegate.Li(ray, scene, sampler);
                     // accumulate pixel value
-                    if cfg!(debug_assertions) {
-                        let mut film = film.write().unwrap();
-                        let acc = film.at_mut(x, y);
-                        *acc = lerp(*acc, radiance / pdf, 1. / (spp + 1) as Float);
-                    } else {
-                        let mut film = film.write().unwrap();
-                        let acc = unsafe { film.at_unchecked_mut(x, y) };
-                        *acc = lerp(*acc, radiance / pdf, 1. / (spp + 1) as Float);
-                    };
-
+                    let mut film = film.write().unwrap();
+                    let acc = if cfg!(debug_assertions) { film.at_mut(x, y) } else { unsafe { film.at_unchecked_mut(x, y) } };
+                    *acc = lerp(*acc, radiance / pdf, 1. / (spp + 1) as Float);
                 }
             }
+            // notify progress
+            *progress.write().unwrap() = spp as Float / self.n_spp as Float;
         }
     }
 }
 
 pub trait SampleIntegratorDelegate {
-    // has n_spp
     /// Compute the incident radiance
     fn Li<G, B, T>(&self, ray: Ray, scene: &Scene<G, B, T>, sampler: &mut impl Sampler) -> Spectrum where G: Geometry, B: BSDF, T: Texture;
 }
