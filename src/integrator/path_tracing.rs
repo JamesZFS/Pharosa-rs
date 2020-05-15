@@ -8,8 +8,7 @@ pub struct PathTracing {
 
 #[allow(unused_variables)]
 impl SampleIntegratorDelegate for PathTracing {
-    fn Li<G, B, T>(&self, ray: Ray, scene: &Scene<G, B, T>, sampler: &mut impl Sampler) -> Spectrum
-        where G: Geometry, B: BSDF, T: Texture {
+    fn Li(&self, ray: Ray, scene: &Scene<impl Geometry, impl BSDF, impl Texture>, sampler: &mut impl Sampler) -> Spectrum {
         unimplemented!()
     }
 }

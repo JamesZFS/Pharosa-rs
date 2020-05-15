@@ -12,7 +12,11 @@ impl Ray {
         Self { org, dir }
     }
 
+    /// Compute the position after the ray transports `t`
     pub fn transport(&self, t: Float) -> Point3f { self.org + self.dir * t }
+
+    /// Move the ray by `t`
+    pub fn forward(&mut self, t: Float) { self.org += self.dir * t }
 }
 
 impl TransformAny<Ray> for Matrix4f {

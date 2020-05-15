@@ -1,15 +1,27 @@
 use super::*;
 use crate::primitive::*;
 
-#[derive(Debug, Clone)]      /// Wraps geometric info of the intersection and the hit primitive
+#[derive(Debug, Clone)]       /// Wraps geometric info of the intersection and the hit primitive
 pub struct Intersection<'a, G, B, T>(pub GeometryIntersection, pub &'a Primitive<G, B, T>) where G: Geometry, B: BSDF, T: Texture;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GeometryIntersection {
     pub pos: Point3f,
+    /// Regularized normal: on the same side with ray.dir
     pub normal: Vector3f,
+    /// Incoming ray unit direction, pointing **out**
+    pub wi: Vector3f,
     /// time from ray.org to the intersection
     pub t: Float,
+    /// The ray is inside or outside the primitive?
+    pub side: Side,
+    // todo transform?
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum Side {
+    Outside,
+    Inside,
 }
 
 impl TransformAny<GeometryIntersection> for Matrix4f {
@@ -17,7 +29,9 @@ impl TransformAny<GeometryIntersection> for Matrix4f {
         GeometryIntersection {
             pos: self.transform_point(src.pos),
             normal: self.transform_vector(src.normal),
+            wi: src.wi,
             t: src.t,
+            side: src.side,
         }
     }
 }

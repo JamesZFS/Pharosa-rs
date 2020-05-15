@@ -60,7 +60,11 @@ mod test {
         scene.push(Primitive::new_with_label(
             "sphere".into(),
             Sphere::new(2.),
-            Arc::new(Material { bsdf: bsdf::Simple::default(), texture: texture::Uniform::new(Spectrum::new(1., 0., 0.)) }),
+            Arc::new(Material {
+                bsdf: bsdf::Simple::default(),
+                texture: texture::Uniform(Spectrum::new(1., 0., 0.)),
+                emission: Spectrum::black(),
+            }),
             Matrix4::from_translation(vec3(0., 0., 0.))));
         scene
     }

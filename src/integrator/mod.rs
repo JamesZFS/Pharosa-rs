@@ -9,15 +9,16 @@ use crate::Context;
 use std::fmt::Debug;
 
 mod simple;
+mod smallpt;
 mod path_tracing;
 
 pub use simple::*;
 pub use path_tracing::*;
+pub use smallpt::*;
 
 pub trait Integrator: Debug + Clone + Send + 'static {
     /// Render the scene, store the result in `film`
-    fn render<G, B, T, C, S>(&self, context: &mut Context<G, B, T, C, S>)
-        where G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler;
+    fn render(&self, context: &mut Context<impl Geometry, impl BSDF, impl Texture, impl CameraInner, impl Sampler>);
 }
 
 #[derive(Debug, Clone)]
@@ -27,8 +28,7 @@ pub struct SampleIntegrator<D: Debug + Clone> {
 }
 
 impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + Debug + Clone + Send + 'static {
-    fn render<G, B, T, C, S>(&self, context: &mut Context<G, B, T, C, S>)
-        where G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler {
+    fn render(&self, context: &mut Context<impl Geometry, impl BSDF, impl Texture, impl CameraInner, impl Sampler>) {
         // unpack
         let Context { scene, camera, sampler, film, progress } = context;
         let (height, width) = {
@@ -55,7 +55,7 @@ impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + D
 
 pub trait SampleIntegratorDelegate {
     /// Compute the incident radiance
-    fn Li<G, B, T>(&self, ray: Ray, scene: &Scene<G, B, T>, sampler: &mut impl Sampler) -> Spectrum where G: Geometry, B: BSDF, T: Texture;
+    fn Li(&self, ray: Ray, scene: &Scene<impl Geometry, impl BSDF, impl Texture>, sampler: &mut impl Sampler) -> Spectrum;
 }
 
 impl<D> Default for SampleIntegrator<D> where D: Default + Debug + Clone {

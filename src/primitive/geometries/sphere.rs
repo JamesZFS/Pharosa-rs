@@ -36,7 +36,9 @@ impl Intersect for Sphere {
                 Some(GeometryIntersection {
                     pos,
                     normal: pos.to_vec().normalize(),
+                    wi: -ray.dir, // todo slow
                     t,
+                    side: Side::Outside
                 })
             } else { // back?
                 let t = -b + ds;
@@ -44,8 +46,10 @@ impl Intersect for Sphere {
                     let pos = ray.transport(t);
                     Some(GeometryIntersection {
                         pos,
-                        normal: pos.to_vec().normalize(),
+                        normal: -pos.to_vec().normalize(),
+                        wi: -ray.dir,
                         t,
+                        side: Side::Inside
                     })
                 } else {
                     None
@@ -79,14 +83,17 @@ mod test {
         assert_eq!(s.intersect(&r), Some(GeometryIntersection {
             pos: pt3(1., 0., 0.),
             normal: vec3(1., 0., 0.),
+            wi: -r.dir,
             t: 9.0,
+            side: Side::Outside
         }));
         let r = Ray::new(pt3(0., 0., 0.), vec3(1., 1., 0.).normalize());
         let x = (2.0 as Float).sqrt() / 2.0;
         let p = pt3(x, x, 0.);
         let its = s.intersect(&r).unwrap();
         assert_approx!((its.pos - p).magnitude(), 0.);
-        assert_approx!((its.normal - p.to_vec()).magnitude(), 0.);
+        assert_approx!((-its.normal - p.to_vec()).magnitude(), 0.);
         assert_approx!(its.t - 1.0, 0.);
+        assert_eq!(its.side, Side::Inside)
     }
 }

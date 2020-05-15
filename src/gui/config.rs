@@ -10,6 +10,4 @@ pub const HEIGHT: u32 = 768;
 pub const FPS_LIMIT: Float = 10.;
 pub const PHAROSA: &str = "Pharosa";
 
-pub const FOVY: Degf = Deg(90.);
-
 pub const SAVE_PATH: &str = "result.png";

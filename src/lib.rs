@@ -19,6 +19,7 @@ pub use sampler::Sampler;
 pub use gui::gui;
 use std::sync::{RwLock, Arc};
 
+#[derive(Debug, Clone)]
 /// All the data we need to do the rendering
 ///
 /// To maximize the performance, we use a very generic representation, though a bit awkward...

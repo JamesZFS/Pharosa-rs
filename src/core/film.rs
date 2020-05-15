@@ -1,6 +1,8 @@
 use super::*;
 use crate::macros::*;
+use std::fmt::{Debug, Formatter};
 
+#[derive(Clone)]
 pub struct Film {
     width: u32,
     height: u32,
@@ -46,4 +48,13 @@ impl Film {
     }
 
     pub fn to_raw(&self) -> &Vec<Spectrum> { &self.data }
+}
+
+impl Debug for Film {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Film")
+            .field("width", &self.width)
+            .field("height", &self.height)
+            .finish()
+    }
 }
