@@ -1,14 +1,14 @@
 #[macro_use]
-pub mod macros;
+mod macros;
 
-pub mod core;
-pub mod primitive;
-pub mod camera;
+mod core;
+mod primitive;
+mod camera;
 pub mod utils;
-pub mod scene;
-pub mod sampler;
-pub mod integrator;
-pub mod gui;
+mod scene;
+mod sampler;
+mod integrator;
+mod gui;
 
 pub use self::core::*;
 pub use scene::*;
@@ -16,13 +16,14 @@ pub use camera::*;
 pub use primitive::*;
 pub use integrator::{Integrator, SampleIntegrator};
 pub use sampler::Sampler;
+pub use gui::gui;
 
 /// All the data we need to do the rendering
 ///
-/// To maximize the performance, we use a very generic representation
-pub struct Context<G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler, I: Integrator> {
+/// To maximize the performance, we use a very generic representation, though a bit awkward...
+pub struct Context<G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler> {
     pub scene: Scene<G, B, T>,
     pub camera: Camera<C>,
     pub sampler: S,
-    pub integrator: I,
+    pub film: Film,
 }

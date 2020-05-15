@@ -5,17 +5,18 @@ use crate::camera::*;
 use crate::scene::Scene;
 use crate::sampler::Sampler;
 use crate::primitive::*;
+use crate::Context;
+use std::fmt::Debug;
 
 mod simple;
 mod path_tracing;
 
 pub use simple::*;
 pub use path_tracing::*;
-use std::fmt::Debug;
 
 pub trait Integrator {
     /// Render the scene, store the result in `film`
-    fn render<G, B, T, C, S>(&self, film: &mut Film, camera: &Camera<C>, scene: &Scene<G, B, T>, sampler: &mut S)
+    fn render<G, B, T, C, S>(&self, context: &mut Context<G, B, T, C, S>)
         where G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler;
 }
 
@@ -26,8 +27,10 @@ pub struct SampleIntegrator<D: Debug + Clone> {
 }
 
 impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + Debug + Clone {
-    fn render<G, B, T, C, S>(&self, film: &mut Film, camera: &Camera<C>, scene: &Scene<G, B, T>, sampler: &mut S)
+    fn render<G, B, T, C, S>(&self, context: &mut Context<G, B, T, C, S>)
         where G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler {
+        // unpack
+        let Context { scene, camera, sampler, film, } = context;
         for y in 0..film.height() {
             for x in 0..film.width() {
                 let acc = if cfg!(debug_assertions) { film.at_mut(x, y) } else { unsafe { film.at_unchecked_mut(x, y) } };

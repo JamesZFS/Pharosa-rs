@@ -1,71 +1,82 @@
 use crate::*;
 use minifb::*;
 use std::time::Duration;
+use std::sync::Arc;
 
 mod config;
 
 use config::*;
-use std::sync::Arc;
+use crate::utils::ToHexColor;
 
-pub struct Gui {
-    /// buffer is always the u32 repr of film
-    buffer: Vec<u32>,
-    window: Window,
+pub fn gui() {
+    let window = setup_window();
+    let context = Context {
+        scene: setup_scene(),
+        camera: setup_camera(),
+        sampler: sampler::Independent,
+        film: Film::new(WIDTH, HEIGHT),
+    };
+    let integrator = setup_integrator();
+    event_loop(window, context, integrator);
 }
 
-impl Gui {
-    pub fn new() -> Self {
-        let film = Film::new(WIDTH, HEIGHT);
-        let scene = setup_scene();
-        let buffer = vec![0xffffffu32; film.size()];
-        let mut window = Window::new(WINDOW_TITLE, film.width() as usize, film.height() as usize,
-                                     WindowOptions {
-                                         borderless: false,
-                                         title: true,
-                                         resize: true,
-                                         scale: Scale::X1,
-                                         scale_mode: ScaleMode::AspectRatioStretch,
-                                         topmost: false,
-                                     })
-            .unwrap();
-        window.limit_update_rate(Some(Duration::from_millis(20)));
-        let mut menu = Menu::new("Control").unwrap();
-        menu.add_item("Load Scene", LOAD_SCENE_BTN).shortcut(Key::N, MENU_KEY_CTRL).build();
-        menu.add_separator();
-        menu.add_item("Start Rendering", START_BTN).shortcut(Key::Enter, MENU_KEY_CTRL).build();
-        menu.add_item("Pause Rendering", PAUSE_BTN).shortcut(Key::Period, MENU_KEY_CTRL).build();
-        menu.add_separator();
-        menu.add_item("Save", SAVE_BTN).shortcut(Key::S, MENU_KEY_CTRL).build();
-        window.add_menu(&menu);
-        window.add_menu(&Menu::new("Help").unwrap());
-        unimplemented!()
-        // Self {
-        //     film,
-        //     buffer,
-        //     window,
-        // }
-    }
+fn event_loop(mut window: Window, mut context: Context<impl Geometry, impl BSDF, impl Texture, impl CameraInner, impl Sampler>, integrator: impl Integrator) {
+    // buffer for the window to display
+    let mut buffer = Vec::with_capacity(context.film.size());
+    window.set_title(PHAROSA);
+    let mut spp = 0;
 
-    pub fn run(&mut self) {
-        unimplemented!()
-        // while self.window.is_open() {
-        //     self.window.update_with_buffer(&self.buffer, self.film.width() as usize, self.film.height() as usize).unwrap();
-        //     self.window.is_menu_pressed().map(|menu_id| {
-        //         match menu_id {
-        //             LOAD_SCENE_BTN => unimplemented!(),
-        //             START_BTN => {
-        //                 println!("Start clicked!");
-        //             }
-        //             PAUSE_BTN => unimplemented!(),
-        //             SAVE_BTN => unimplemented!(),
-        //             _ => unreachable!()
-        //         }
-        //     });
-        // }
+    while window.is_open() {
+        window.set_title(&format!("{} spp = {}", PHAROSA, spp));
+        spp += 1;
+        // do rendering
+        integrator.render(&mut context);
+
+        // refresh display
+        buffer.clear();
+        buffer.extend(context.film.to_raw().iter().map(|s| s.to_hex_color()));
+        window.update_with_buffer(&buffer, WIDTH as usize, HEIGHT as usize).unwrap();
+
+        // process menu events
+        window.is_menu_pressed().map(|menu_id| {
+            match menu_id {
+                LOAD_SCENE_BTN => unimplemented!(),
+                START_BTN => {
+                    println!("Start clicked!");
+                }
+                PAUSE_BTN => unimplemented!(),
+                SAVE_BTN => unimplemented!(),
+                _ => unreachable!()
+            }
+        });
     }
 }
 
-fn setup_scene() -> Scene<Sphere, bsdf::Simple, texture::Uniform> {
+fn setup_window() -> Window {
+    let mut window = Window::new
+        (&format!("{} (initializing...)", PHAROSA), WIDTH as usize, HEIGHT as usize,
+         WindowOptions {
+             borderless: false,
+             title: true,
+             resize: true,
+             scale: Scale::X1,
+             scale_mode: ScaleMode::AspectRatioStretch,
+             topmost: false,
+         }).unwrap();
+    window.limit_update_rate(Some(Duration::from_micros((1e6 / FPS_LIMIT) as u64))); // refresh rate
+    let mut menu = Menu::new("Control").unwrap();
+    menu.add_item("Load Scene", LOAD_SCENE_BTN).shortcut(Key::N, MENU_KEY_CTRL).build();
+    menu.add_separator();
+    menu.add_item("Start Rendering", START_BTN).shortcut(Key::Enter, MENU_KEY_CTRL).build();
+    menu.add_item("Pause Rendering", PAUSE_BTN).shortcut(Key::Period, MENU_KEY_CTRL).build();
+    menu.add_separator();
+    menu.add_item("Save", SAVE_BTN).shortcut(Key::S, MENU_KEY_CTRL).build();
+    window.add_menu(&menu);
+    window.add_menu(&Menu::new("Help").unwrap());
+    window
+}
+
+fn setup_scene() -> Scene<impl Geometry, impl BSDF, impl Texture> {
     let mut scene = Scene::new();
     scene.push(Primitive::new(
         Sphere::new(0.5),
@@ -78,7 +89,7 @@ fn setup_scene() -> Scene<Sphere, bsdf::Simple, texture::Uniform> {
     scene
 }
 
-fn setup_camera() -> Camera<camera::Perspective> {
+fn setup_camera() -> Camera<impl CameraInner> {
     let pers = camera::Perspective::new(WIDTH, HEIGHT, FOVY);
     let camera = Camera::new(
         pers,
@@ -88,4 +99,8 @@ fn setup_camera() -> Camera<camera::Perspective> {
             vec3(0., 1., 0.)),
     );
     camera
+}
+
+fn setup_integrator() -> impl Integrator {
+    integrator::SampleIntegrator { n_spp: 1, delegate: integrator::Normal }
 }
