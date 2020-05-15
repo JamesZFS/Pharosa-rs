@@ -1,7 +1,8 @@
 use super::*;
+use crate::primitive::*;
 
 #[derive(Debug, Clone)]      /// Wraps geometric info of the intersection and the hit primitive
-pub struct Intersection<'a>(pub GeometryIntersection, pub &'a Primitive);
+pub struct Intersection<'a, G, B, T>(pub GeometryIntersection, pub &'a Primitive<G, B, T>) where G: Geometry, B: BSDF, T: Texture;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GeometryIntersection {
@@ -21,9 +22,9 @@ impl TransformAny<GeometryIntersection> for Matrix4f {
     }
 }
 
-impl<'a> TransformAny<Intersection<'a>> for Matrix4f {
+impl<'a, G, B, T> TransformAny<Intersection<'a, G, B, T>> for Matrix4f where G: Geometry, B: BSDF, T: Texture {
     #[inline]
-    fn transform(&self, src: &Intersection<'a>) -> Intersection<'a> {
+    fn transform(&self, src: &Intersection<'a, G, B, T>) -> Intersection<'a, G, B, T> {
         Intersection(self.transform(&src.0), src.1)
     }
 }

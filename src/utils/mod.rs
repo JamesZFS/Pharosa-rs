@@ -36,3 +36,13 @@ impl ToImageBuffer for Film {
                              |x, y| Rgb(self.at(x, y).gamma_correction().into()))
     }
 }
+
+pub trait ToHexColor {
+    fn to_hex_color(&self) -> u32;
+}
+
+impl ToHexColor for Spectrum {
+    fn to_hex_color(&self) -> u32 {
+        (((self.x * 255.) as u32) << 16) | (((self.y * 255.) as u32) << 8) | ((self.z * 255.) as u32)
+    }
+}

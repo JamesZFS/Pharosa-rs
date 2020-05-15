@@ -4,8 +4,6 @@ mod simple;
 
 pub use simple::Simple;
 
-pub trait BSDF: DynClone + Debug {
+pub trait BSDF: Debug {
     //todo
 }
-
-dyn_clone::clone_trait_object!(BSDF);

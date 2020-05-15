@@ -6,9 +6,10 @@ pub struct PathTracing {
     pub max_depth_rr: u32,
 }
 
-#[allow(non_snake_case)]
+#[allow(unused_variables)]
 impl SampleIntegratorDelegate for PathTracing {
-    fn Li(&self, _ray: Ray, _scene: &Scene, _sampler: &mut impl Sampler) -> Spectrum {
+    fn Li<G, B, T>(&self, ray: Ray, scene: &Scene<G, B, T>, sampler: &mut impl Sampler) -> Spectrum
+        where G: Geometry, B: BSDF, T: Texture {
         unimplemented!()
     }
 }

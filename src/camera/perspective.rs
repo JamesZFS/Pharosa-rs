@@ -50,17 +50,17 @@ mod test {
     use crate::scene::*;
     use crate::sampler::{Fake, Sampler};
     use crate::primitive::*;
-    use std::rc::Rc;
+    use std::sync::Arc;
 
     const WIDTH: u32 = 1024;
     const HEIGHT: u32 = 768;
 
-    fn setup_scene() -> Scene {
+    fn setup_scene() -> Scene<impl Geometry, impl BSDF, impl Texture> {
         let mut scene = Scene::new();
         scene.push(Primitive::new_with_label(
             "sphere".into(),
-            Box::new(Sphere::new(2.)),
-            Rc::new(Material { bsdf: bsdf::Simple::default(), texture: texture::Uniform::new(Spectrum::new(1., 0., 0.)) }),
+            Sphere::new(2.),
+            Arc::new(Material { bsdf: bsdf::Simple::default(), texture: texture::Uniform::new(Spectrum::new(1., 0., 0.)) }),
             Matrix4::from_translation(vec3(0., 0., 0.))));
         scene
     }

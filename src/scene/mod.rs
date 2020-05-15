@@ -1,18 +1,18 @@
-use crate::primitive::Primitive;
-use std::ops::{Deref, DerefMut};
 use crate::core::*;
+use crate::primitive::*;
+use std::ops::{Deref, DerefMut};
 
 #[derive(Clone, Debug)]
-pub struct Scene {
-    primitives: Vec<Primitive>,
+pub struct Scene<G: Geometry, B: BSDF, T: Texture> {
+    primitives: Vec<Primitive<G, B, T>>,
 }
 
-impl Scene {
+impl<G, B, T> Scene<G, B, T> where G: Geometry, B: BSDF, T: Texture {
     #[inline]
     pub fn new() -> Self { Self { primitives: Vec::new() } }
 
-    pub fn nearest_hit(&self, ray_world: &Ray) -> Option<Intersection> {
-        let mut isect: Option<Intersection> = None;
+    pub fn nearest_hit(&self, ray_world: &Ray) -> Option<Intersection<G, B, T>> {
+        let mut isect: Option<Intersection<G, B, T>> = None;
         for prim in &self.primitives {
             let new_isect = prim.intersect(ray_world);
             if let Some(new_isect) = new_isect {
@@ -33,14 +33,14 @@ impl Scene {
     }
 }
 
-impl Deref for Scene {
-    type Target = Vec<Primitive>;
+impl<G, B, T> Deref for Scene<G, B, T> where G: Geometry, B: BSDF, T: Texture {
+    type Target = Vec<Primitive<G, B, T>>;
     fn deref(&self) -> &Self::Target {
         &self.primitives
     }
 }
 
-impl DerefMut for Scene {
+impl<G, B, T> DerefMut for Scene<G, B, T> where G: Geometry, B: BSDF, T: Texture {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.primitives
     }

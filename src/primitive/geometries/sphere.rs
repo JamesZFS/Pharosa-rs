@@ -2,7 +2,7 @@ use super::*;
 use crate::macros::*;
 
 #[derive(Debug, Clone)]
-pub struct Sphere {
+pub struct Sphere { // todo: store global coordinates instead of local
     radius: Real,
     rad2: Real,
 }
@@ -55,7 +55,9 @@ impl Intersect for Sphere {
     }
 }
 
-impl Geometry for Sphere {}
+impl Geometry for Sphere {
+    // todo
+}
 
 #[cfg(test)]
 mod test {
@@ -82,10 +84,9 @@ mod test {
         let r = Ray::new(pt3(0., 0., 0.), vec3(1., 1., 0.).normalize());
         let x = (2.0 as Real).sqrt() / 2.0;
         let p = pt3(x, x, 0.);
-        assert_eq!(s.intersect(&r), Some(GeometryIntersection {
-            pos: p,
-            normal: p.to_vec(),
-            t: 1.0,
-        }));
+        let its = s.intersect(&r).unwrap();
+        assert_approx!((its.pos - p).magnitude(), 0.);
+        assert_approx!((its.normal - p.to_vec()).magnitude(), 0.);
+        assert_approx!(its.t - 1.0, 0.);
     }
 }

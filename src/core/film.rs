@@ -1,8 +1,6 @@
 use super::*;
 use crate::macros::*;
 
-// pub type Film = ImageBuffer<Rgb<f32>, Vec<f32>>;
-
 pub struct Film {
     width: u32,
     height: u32,
@@ -20,6 +18,7 @@ impl Film {
     }
     pub fn width(&self) -> u32 { self.width }
     pub fn height(&self) -> u32 { self.height }
+    pub fn size(&self) -> usize { self.data.len() }
     pub fn at(&self, x: u32, y: u32) -> &Spectrum {
         unsafe { self.data.get_unchecked(self.index(x, y)) } // safety is guaranteed inside self.index
     }
@@ -45,4 +44,6 @@ impl Film {
     fn index_unchecked(&self, x: u32, y: u32) -> usize {
         (x + y * self.width) as usize
     }
+
+    pub fn to_raw(&self) -> &Vec<Spectrum> { &self.data }
 }

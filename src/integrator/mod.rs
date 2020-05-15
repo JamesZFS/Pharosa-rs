@@ -1,7 +1,10 @@
+#![allow(non_snake_case)]
+
 use crate::core::*;
 use crate::camera::*;
 use crate::scene::Scene;
 use crate::sampler::Sampler;
+use crate::primitive::*;
 
 mod simple;
 mod path_tracing;
@@ -12,8 +15,8 @@ use std::fmt::Debug;
 
 pub trait Integrator {
     /// Render the scene, store the result in `film`
-    fn render<C, S>(&self, film: &mut Film, camera: &Camera<C>, scene: &Scene, sampler: &mut S)
-        where C: CameraInner, S: Sampler;
+    fn render<G, B, T, C, S>(&self, film: &mut Film, camera: &Camera<C>, scene: &Scene<G, B, T>, sampler: &mut S)
+        where G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler;
 }
 
 #[derive(Debug, Clone)]
@@ -23,7 +26,8 @@ pub struct SampleIntegrator<D: Debug + Clone> {
 }
 
 impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + Debug + Clone {
-    fn render<C, S>(&self, film: &mut Film, camera: &Camera<C>, scene: &Scene, sampler: &mut S) where C: CameraInner, S: Sampler {
+    fn render<G, B, T, C, S>(&self, film: &mut Film, camera: &Camera<C>, scene: &Scene<G, B, T>, sampler: &mut S)
+        where G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler {
         for y in 0..film.height() {
             for x in 0..film.width() {
                 let acc = if cfg!(debug_assertions) { film.at_mut(x, y) } else { unsafe { film.at_unchecked_mut(x, y) } };
@@ -38,11 +42,10 @@ impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + D
     }
 }
 
-#[allow(non_snake_case)]
 pub trait SampleIntegratorDelegate {
     // has n_spp
     /// Compute the incident radiance
-    fn Li(&self, ray: Ray, scene: &Scene, sampler: &mut impl Sampler) -> Spectrum;
+    fn Li<G, B, T>(&self, ray: Ray, scene: &Scene<G, B, T>, sampler: &mut impl Sampler) -> Spectrum where G: Geometry, B: BSDF, T: Texture;
 }
 
 impl<D> Default for SampleIntegrator<D> where D: Default + Debug + Clone {

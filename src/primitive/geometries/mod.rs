@@ -1,10 +1,14 @@
 use super::*;
 
 mod sphere;
+mod triangle;
+mod dynamic;
 
 pub use sphere::Sphere;
+pub use triangle::Triangle;
+pub use dynamic::DynamicGeometry;
 
-pub trait Geometry: Intersect + DynClone {
+pub trait Geometry: Intersect {
     // Others...
 }
 
@@ -13,4 +17,3 @@ pub trait Intersect: Debug {
     fn intersect(&self, ray: &Ray) -> Option<GeometryIntersection>;
 }
 
-dyn_clone::clone_trait_object!(Geometry);

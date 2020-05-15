@@ -6,7 +6,6 @@ pub use intersection::*;
 pub use ray::Ray;
 pub use spectrum::Spectrum;
 
-use crate::primitive::Primitive;
 use std::ops::{Add, Sub, Mul};
 
 mod ray;
