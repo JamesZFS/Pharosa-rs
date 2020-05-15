@@ -4,7 +4,7 @@ use super::*;
 pub enum Simple {
     Diffuse,
     Specular,
-    Dielectric { n: Real },
+    Dielectric { n: Float },
 }
 
 impl Default for Simple {

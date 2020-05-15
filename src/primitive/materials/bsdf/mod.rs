@@ -4,6 +4,6 @@ mod simple;
 
 pub use simple::Simple;
 
-pub trait BSDF: Debug {
+pub trait BSDF: Debug + Clone + Send + Sync + 'static {
     //todo
 }

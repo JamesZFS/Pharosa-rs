@@ -1,6 +1,7 @@
 pub use perspective::Perspective;
 
 use crate::core::*;
+use std::fmt::Debug;
 
 mod perspective;
 mod orthogonal;
@@ -26,7 +27,7 @@ impl<C> Camera<C> where C: CameraInner {
     }
 
     /// Sample a ray, return the world ray and its pdf
-    pub fn generate_ray(&self, x: u32, y: u32, aperture_samp: Point2f) -> (Ray, Real) {
+    pub fn generate_ray(&self, x: u32, y: u32, aperture_samp: Point2f) -> (Ray, Float) {
         let (ray, pdf) = self.inner.generate_ray(x, y, aperture_samp);
         debug_assert_approx!(ray.dir.magnitude(), 1.0);
         (self.local_to_world.transform(&ray), pdf)
@@ -39,9 +40,9 @@ impl<C> Camera<C> where C: CameraInner {
     }
 }
 
-pub trait CameraInner {
+pub trait CameraInner: Clone + Debug + Send + Sync + 'static {
     /// Sample a ray, return the local ray and its pdf
-    fn generate_ray(&self, x: u32, y: u32, aperture_samp: Point2f) -> (Ray, Real);
+    fn generate_ray(&self, x: u32, y: u32, aperture_samp: Point2f) -> (Ray, Float);
 }
 
 #[cfg(test)]

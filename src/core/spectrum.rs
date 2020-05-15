@@ -6,7 +6,7 @@ use std::ops::{Add, Sub, Mul, Div, Deref, DerefMut};
 pub struct Spectrum(Vector3f);
 
 impl Spectrum {
-    pub fn new(r: Real, g: Real, b: Real) -> Self { Spectrum(vec3(r, g, b)) }
+    pub fn new(r: Float, g: Float, b: Float) -> Self { Spectrum(vec3(r, g, b)) }
     pub fn black() -> Self { Spectrum(Vector3::zero()) }
 }
 
@@ -45,14 +45,14 @@ impl Div for Spectrum {
     fn div(self, rhs: Self) -> Self::Output { Spectrum(self.0.div_element_wise(rhs.0)) }
 }
 
-impl Mul<Real> for Spectrum {
+impl Mul<Float> for Spectrum {
     type Output = Self;
-    fn mul(self, rhs: Real) -> Self::Output { Spectrum(self.0 * rhs) }
+    fn mul(self, rhs: Float) -> Self::Output { Spectrum(self.0 * rhs) }
 }
 
-impl Div<Real> for Spectrum {
+impl Div<Float> for Spectrum {
     type Output = Self;
-    fn div(self, rhs: Real) -> Self::Output { Spectrum(self.0 / rhs) }
+    fn div(self, rhs: Float) -> Self::Output { Spectrum(self.0 / rhs) }
 }
 
 impl From<Point3f> for Spectrum {

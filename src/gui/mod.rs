@@ -1,12 +1,13 @@
 use crate::*;
 use minifb::*;
 use std::time::Duration;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 mod config;
 
 use config::*;
 use crate::utils::ToHexColor;
+use std::thread::spawn;
 
 pub fn gui() {
     let window = setup_window();
@@ -14,7 +15,7 @@ pub fn gui() {
         scene: setup_scene(),
         camera: setup_camera(),
         sampler: sampler::Independent,
-        film: Film::new(WIDTH, HEIGHT),
+        film: Arc::new(RwLock::new(Film::new(WIDTH, HEIGHT))),
     };
     let integrator = setup_integrator();
     event_loop(window, context, integrator);
@@ -22,34 +23,48 @@ pub fn gui() {
 
 fn event_loop(mut window: Window, mut context: Context<impl Geometry, impl BSDF, impl Texture, impl CameraInner, impl Sampler>, integrator: impl Integrator) {
     // buffer for the window to display
-    let mut buffer = Vec::with_capacity(context.film.size());
+    let mut buffer = Vec::with_capacity(context.film.read().unwrap().size());
     window.set_title(PHAROSA);
-    let mut spp = 0;
+
+    let spp = Arc::new(RwLock::new(0u32));
+    let film = context.film.clone();
+    let kernel;
+    { // create the kernel thread
+        let spp = spp.clone();
+        kernel = spawn(move || {
+            println!("Kernel started.");
+            // do rendering in 'kernel' thread
+            loop {
+                integrator.render(&mut context);
+                *spp.write().unwrap() += 1;
+            }
+            println!("Kernel finished.");
+        });
+    }
 
     while window.is_open() {
-        window.set_title(&format!("{} spp = {}", PHAROSA, spp));
-        spp += 1;
-        // do rendering
-        integrator.render(&mut context);
+        window.set_title(&format!("{} spp = {}", PHAROSA, spp.read().unwrap()));
 
         // refresh display
         buffer.clear();
-        buffer.extend(context.film.to_raw().iter().map(|s| s.to_hex_color()));
+        buffer.extend(film.read().unwrap().to_raw().iter().map(|s| s.to_hex_color()));
         window.update_with_buffer(&buffer, WIDTH as usize, HEIGHT as usize).unwrap();
 
         // process menu events
-        window.is_menu_pressed().map(|menu_id| {
-            match menu_id {
-                LOAD_SCENE_BTN => unimplemented!(),
-                START_BTN => {
-                    println!("Start clicked!");
-                }
-                PAUSE_BTN => unimplemented!(),
-                SAVE_BTN => unimplemented!(),
-                _ => unreachable!()
-            }
-        });
+        // window.is_menu_pressed().map(|menu_id| {
+        //     match menu_id {
+        //         LOAD_SCENE_BTN => unimplemented!(),
+        //         START_BTN => {
+        //             println!("Start clicked!");
+        //         }
+        //         PAUSE_BTN => unimplemented!(),
+        //         SAVE_BTN => unimplemented!(),
+        //         _ => unreachable!()
+        //     }
+        // });
     }
+    println!("Waiting for kernel to finish...");
+    kernel.join().unwrap();
 }
 
 fn setup_window() -> Window {

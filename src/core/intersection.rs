@@ -9,7 +9,7 @@ pub struct GeometryIntersection {
     pub pos: Point3f,
     pub normal: Vector3f,
     /// time from ray.org to the intersection
-    pub t: Real,
+    pub t: Float,
 }
 
 impl TransformAny<GeometryIntersection> for Matrix4f {

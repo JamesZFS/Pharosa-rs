@@ -15,18 +15,18 @@ mod film;
 
 /// Global floating point precision
 #[cfg(feature = "float32")]
-pub type Real = f32;
+pub type Float = f32;
 
 // #[cfg(feature = "float64")]
 // pub type Real = f64;
 
-pub type Radf = Rad<Real>;
-pub type Degf = Deg<Real>;
-pub type Point2f = Point2<Real>;
-pub type Point3f = Point3<Real>;
-pub type Vector2f = Vector2<Real>;
-pub type Vector3f = Vector3<Real>;
-pub type Matrix4f = Matrix4<Real>;
+pub type Radf = Rad<Float>;
+pub type Degf = Deg<Float>;
+pub type Point2f = Point2<Float>;
+pub type Point3f = Point3<Float>;
+pub type Vector2f = Vector2<Float>;
+pub type Vector3f = Vector3<Float>;
+pub type Matrix4f = Matrix4<Float>;
 
 #[inline(always)]
 pub fn pt3<S>(x: S, y: S, z: S) -> Point3<S> {
@@ -58,6 +58,6 @@ impl TransformAny<Vector3f> for Matrix4f {
 
 /// Linear interpolate
 #[inline]
-pub fn lerp<S>(a: S, b: S, t: Real) -> S where S: Copy + Add<S, Output=S> + Sub<S, Output=S> + Mul<Real, Output=S> {
+pub fn lerp<S>(a: S, b: S, t: Float) -> S where S: Copy + Add<S, Output=S> + Sub<S, Output=S> + Mul<Float, Output=S> {
     a + (b - a) * t
 }

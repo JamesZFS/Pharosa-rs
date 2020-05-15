@@ -14,7 +14,7 @@ mod path_tracing;
 pub use simple::*;
 pub use path_tracing::*;
 
-pub trait Integrator {
+pub trait Integrator: Debug + Clone + Send + 'static {
     /// Render the scene, store the result in `film`
     fn render<G, B, T, C, S>(&self, context: &mut Context<G, B, T, C, S>)
         where G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler;
@@ -26,19 +26,31 @@ pub struct SampleIntegrator<D: Debug + Clone> {
     pub delegate: D,
 }
 
-impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + Debug + Clone {
+impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + Debug + Clone + Send + 'static {
     fn render<G, B, T, C, S>(&self, context: &mut Context<G, B, T, C, S>)
         where G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler {
         // unpack
-        let Context { scene, camera, sampler, film, } = context;
-        for y in 0..film.height() {
-            for x in 0..film.width() {
-                let acc = if cfg!(debug_assertions) { film.at_mut(x, y) } else { unsafe { film.at_unchecked_mut(x, y) } };
+        let Context { scene, camera, sampler, film } = context;
+        let (height, width) = {
+            let film = film.read().unwrap();
+            (film.height(), film.width())
+        };
+        for y in 0..height {
+            for x in 0..width {
                 for spp in 0..self.n_spp {
                     let (ray, pdf) = camera.generate_ray(x, y, sampler.next2d());
                     let radiance = self.delegate.Li(ray, scene, sampler);
                     // accumulate pixel value
-                    *acc = lerp(*acc, radiance / pdf, 1. / (spp + 1) as Real);
+                    if cfg!(debug_assertions) {
+                        let mut film = film.write().unwrap();
+                        let acc = film.at_mut(x, y);
+                        *acc = lerp(*acc, radiance / pdf, 1. / (spp + 1) as Float);
+                    } else {
+                        let mut film = film.write().unwrap();
+                        let acc = unsafe { film.at_unchecked_mut(x, y) };
+                        *acc = lerp(*acc, radiance / pdf, 1. / (spp + 1) as Float);
+                    };
+
                 }
             }
         }

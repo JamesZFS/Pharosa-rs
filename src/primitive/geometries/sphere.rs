@@ -3,16 +3,16 @@ use crate::macros::*;
 
 #[derive(Debug, Clone)]
 pub struct Sphere { // todo: store global coordinates instead of local
-    radius: Real,
-    rad2: Real,
+    radius: Float,
+    rad2: Float,
 }
 
 impl Sphere {
-    pub fn new(radius: Real) -> Self {
+    pub fn new(radius: Float) -> Self {
         debug_assert_gt!(radius, 0.);
         Sphere { radius, rad2: radius * radius }
     }
-    pub fn set_radius(&mut self, new: Real) {
+    pub fn set_radius(&mut self, new: Float) {
         debug_assert_gt!(new, 0.);
         self.radius = new;
         self.rad2 = new * new;
@@ -24,14 +24,14 @@ impl Intersect for Sphere {
     fn intersect(&self, ray: &Ray) -> Option<GeometryIntersection> {
         debug_assert_approx!(ray.dir.magnitude(), 1.0); // assume dir^2 == 1
         let org = ray.org.to_vec();
-        let b: Real = org.dot(ray.dir);
+        let b: Float = org.dot(ray.dir);
         let delta = b * b - org.magnitude2() + self.rad2;
         if delta < 0. {
             None
         } else {
             let ds = delta.sqrt();
             let t = -b - ds;
-            if t > Real::epsilon() { // front?
+            if t > Float::epsilon() { // front?
                 let pos = ray.transport(t);
                 Some(GeometryIntersection {
                     pos,
@@ -40,7 +40,7 @@ impl Intersect for Sphere {
                 })
             } else { // back?
                 let t = -b + ds;
-                if t > Real::epsilon() {
+                if t > Float::epsilon() {
                     let pos = ray.transport(t);
                     Some(GeometryIntersection {
                         pos,
@@ -82,7 +82,7 @@ mod test {
             t: 9.0,
         }));
         let r = Ray::new(pt3(0., 0., 0.), vec3(1., 1., 0.).normalize());
-        let x = (2.0 as Real).sqrt() / 2.0;
+        let x = (2.0 as Float).sqrt() / 2.0;
         let p = pt3(x, x, 0.);
         let its = s.intersect(&r).unwrap();
         assert_approx!((its.pos - p).magnitude(), 0.);

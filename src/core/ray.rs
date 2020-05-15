@@ -12,7 +12,7 @@ impl Ray {
         Self { org, dir }
     }
 
-    pub fn transport(&self, t: Real) -> Point3f { self.org + self.dir * t }
+    pub fn transport(&self, t: Float) -> Point3f { self.org + self.dir * t }
 }
 
 impl TransformAny<Ray> for Matrix4f {

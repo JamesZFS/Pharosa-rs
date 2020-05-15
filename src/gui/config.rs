@@ -7,7 +7,7 @@ pub const SAVE_BTN: usize = 3;
 
 pub const WIDTH: u32 = 1024;
 pub const HEIGHT: u32 = 768;
-pub const FPS_LIMIT: Real = 60.;
+pub const FPS_LIMIT: Float = 60.;
 pub const PHAROSA: &str = "Pharosa";
 
 pub const FOVY: Degf = Deg(90.);

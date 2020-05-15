@@ -17,6 +17,7 @@ pub use primitive::*;
 pub use integrator::{Integrator, SampleIntegrator};
 pub use sampler::Sampler;
 pub use gui::gui;
+use std::sync::{RwLock, Arc};
 
 /// All the data we need to do the rendering
 ///
@@ -25,5 +26,6 @@ pub struct Context<G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler>
     pub scene: Scene<G, B, T>,
     pub camera: Camera<C>,
     pub sampler: S,
-    pub film: Film,
+    /// `film` is read by gui thread, written by kernel thread
+    pub film: Arc<RwLock<Film>>,
 }

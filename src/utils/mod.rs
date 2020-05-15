@@ -1,14 +1,14 @@
 use crate::core::*;
 use image::*;
 
-const GAMMA: Real = 2.2;
-const INV_GAMMA: Real = 1. / GAMMA;
+const GAMMA: Float = 2.2;
+const INV_GAMMA: Float = 1. / GAMMA;
 
 pub trait GammaCorrection {
     fn gamma_correction(&self) -> Self;
 }
 
-impl GammaCorrection for Real {
+impl GammaCorrection for Float {
     fn gamma_correction(&self) -> Self {
         self.powf(INV_GAMMA)
     }

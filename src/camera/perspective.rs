@@ -2,19 +2,19 @@ use super::*;
 
 #[derive(Clone, Debug)]
 pub struct Perspective {
-    width: Real,
-    height: Real,
+    width: Float,
+    height: Float,
     /// width / height
-    aspect: Real,
+    aspect: Float,
     fovy: Radf,
     /// -1/2 cot(fovy/2)
-    dir_z: Real,
+    dir_z: Float,
     fovx: Radf,
 }
 
 impl Perspective {
     pub fn new<A>(width: u32, height: u32, fovy: A) -> Self where A: Into<Radf> {
-        let (width, height) = (width as Real, height as Real);
+        let (width, height) = (width as Float, height as Float);
         let fovy = fovy.into();
         let tan_fovy_2 = (fovy.0 / 2.).tan();
         let aspect = width / height;
@@ -30,10 +30,10 @@ impl Perspective {
 }
 
 impl CameraInner for Perspective {
-    fn generate_ray(&self, x: u32, y: u32, aperture_samp: Point2f) -> (Ray, Real) {
-        debug_assert!((x as Real) < self.width && (y as Real) < self.height);
+    fn generate_ray(&self, x: u32, y: u32, aperture_samp: Point2f) -> (Ray, Float) {
+        debug_assert!((x as Float) < self.width && (y as Float) < self.height);
         // [0,1] -> [-0.5,0.5]
-        let (x, y) = (x as Real + (aperture_samp.x - 0.5), y as Real + (aperture_samp.y - 0.5)); // MSAA
+        let (x, y) = (x as Float + (aperture_samp.x - 0.5), y as Float + (aperture_samp.y - 0.5)); // MSAA
         let dir = vec3(
             (x / self.width - 0.5) * self.aspect,
             y / self.height - 0.5,
