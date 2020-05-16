@@ -1,5 +1,6 @@
 use super::*;
 use crate::macros::*;
+use std::mem::MaybeUninit;
 
 #[derive(Debug, Clone)]
 pub struct Sphere { // todo: store global coordinates instead of local
@@ -38,7 +39,8 @@ impl Intersect for Sphere {
                     normal: pos.to_vec().normalize(),
                     wi: -ray.dir, // todo slow
                     t,
-                    side: Side::Outside
+                    side: Side::Outside,
+                    uv: unsafe { MaybeUninit::zeroed().assume_init() }
                 })
             } else { // back?
                 let t = -b + ds;
@@ -49,7 +51,8 @@ impl Intersect for Sphere {
                         normal: -pos.to_vec().normalize(),
                         wi: -ray.dir,
                         t,
-                        side: Side::Inside
+                        side: Side::Inside,
+                        uv: unsafe { MaybeUninit::zeroed().assume_init() }
                     })
                 } else {
                     None

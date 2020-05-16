@@ -32,8 +32,8 @@ type CommandSender = Arc<(Condvar, Mutex<KernelCommand>)>;
 pub fn gui() {
     let window = setup_window();
     let context = Arc::new(UnsafeWrapper::new(Context {
-        scene: setup_scene(),
-        camera: setup_camera(),
+        scene: setup_scene_cornell(),
+        camera: setup_camera_cornell(),
         sampler: sampler::Independent,
         film: Film::new(WIDTH, HEIGHT),
         progress: Float::nan(),

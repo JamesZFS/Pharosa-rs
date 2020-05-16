@@ -17,10 +17,11 @@ impl SampleIntegratorDelegate for SmallPT {
                     radiance += &throughput * scene.environ_map(&ray);
                     break;
                 }
-                Some(Intersection(its, hit)) => {
-                    radiance += &throughput * &hit.material.emission;
+                Some(its) => {
+                    radiance += &throughput * its.emission();
+                    // break;
                     // do bsdf sampling:
-                    let b_rec = hit.material.sample_bsdf(&its, sampler.next2d());
+                    let b_rec = its.sample_bsdf(sampler.next2d());
                     throughput *= b_rec.weight / b_rec.pdf;
 
                     let P = throughput.max();
@@ -33,7 +34,7 @@ impl SampleIntegratorDelegate for SmallPT {
                     }
 
                     // forward ray to the next intersection
-                    ray = Ray::new(its.pos, b_rec.wo);
+                    ray = Ray::new(its.pos(), b_rec.wo);
                     ray.forward(Float::epsilon());
                     depth += 1;
                 },

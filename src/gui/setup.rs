@@ -42,7 +42,7 @@ pub fn setup_scene_cornell() -> Scene<impl Geometry, impl BSDF, impl Texture> {
         [50., -1e5 + 81.6, 81.6],
         [27., 16.5, 47.],
         [73., 16.5, 78.],
-        [50., 681.6 - 0.27, 81.6],
+        [50., 681.6 - 0.27, 81.6], // Light
     ];
     let emission = [
         [0., 0., 0.],
@@ -138,6 +138,6 @@ pub fn setup_camera() -> Camera<impl CameraInner> {
 }
 
 pub fn setup_integrator() -> impl Integrator {
-    // integrator::SampleIntegrator { n_spp: 100, delegate: integrator::SmallPT { rr_depth: 5 } }
-    integrator::SampleIntegrator { n_spp: 10, delegate: integrator::Normal::default() }
+    integrator::SampleIntegrator { n_spp: 100, delegate: integrator::SmallPT { rr_depth: 5 } }
+    // integrator::SampleIntegrator { n_spp: 10, delegate: integrator::Normal::default() }
 }

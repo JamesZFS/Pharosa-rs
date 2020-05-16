@@ -1,5 +1,6 @@
 use crate::core::*;
 use image::*;
+use num_traits::clamp;
 
 const GAMMA: Float = 2.2;
 const INV_GAMMA: Float = 1. / GAMMA;
@@ -10,7 +11,7 @@ pub trait GammaCorrection {
 
 impl GammaCorrection for Float {
     fn gamma_correction(&self) -> Self {
-        self.powf(INV_GAMMA)
+        clamp(self.powf(INV_GAMMA), 0., 1.)
     }
 }
 
