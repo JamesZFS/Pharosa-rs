@@ -111,16 +111,8 @@ fn save(film: &Film) {
 }
 
 fn setup_window() -> Window {
-    let mut window = Window::new
-        (&format!("{} (initializing...)", PHAROSA), WIDTH as usize, HEIGHT as usize,
-         WindowOptions {
-             borderless: false,
-             title: true,
-             resize: true,
-             scale: Scale::X1,
-             scale_mode: ScaleMode::AspectRatioStretch,
-             topmost: true,
-         }).unwrap();
+    let mut window = Window::new(&format!("{} (initializing...)", PHAROSA), WIDTH as usize, HEIGHT as usize, WINDOW_OPTS)
+        .unwrap();
     window.limit_update_rate(Some(Duration::from_micros((1e6 / FPS_LIMIT) as u64))); // refresh rate
     let mut menu = Menu::new("Control").unwrap();
     menu.add_item("Load Scene", LOAD_SCENE_BTN).shortcut(Key::N, MENU_KEY_CTRL).build();

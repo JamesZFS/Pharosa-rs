@@ -38,9 +38,10 @@ impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + D
                 let acc = if cfg!(debug_assertions) { film.at_mut(x, y) } else { unsafe { film.at_unchecked_mut(x, y) } };
                 for spp in 0..self.n_spp {
                     let (ray, pdf) = camera.generate_ray(x, y, sampler.next2d());
-                    let radiance = self.delegate.Li(ray, scene, sampler);
+                    let mut radiance = self.delegate.Li(ray, scene, sampler);
+                    radiance /= pdf;
                     // accumulate pixel value
-                    *acc = lerp(*acc, radiance / pdf, 1. / (spp + 1) as Float);
+                    *acc = lerp(&*acc, &radiance, 1. / (spp + 1) as Float);
                 }
             }
             // notify progress

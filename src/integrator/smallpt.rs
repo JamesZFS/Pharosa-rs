@@ -14,11 +14,11 @@ impl SampleIntegratorDelegate for SmallPT {
         loop {
             match scene.nearest_hit(&ray) {
                 None => {
-                    radiance += throughput * scene.environ_map(&ray);
+                    radiance += &throughput * scene.environ_map(&ray);
                     break;
                 }
                 Some(Intersection(its, hit)) => {
-                    radiance += throughput * hit.material.emission;
+                    radiance += &throughput * &hit.material.emission;
                     // do bsdf sampling:
                     let b_rec = hit.material.sample_bsdf(&its, sampler.next2d());
                     throughput *= b_rec.weight / b_rec.pdf;

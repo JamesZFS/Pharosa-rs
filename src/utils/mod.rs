@@ -16,13 +16,13 @@ impl GammaCorrection for Float {
 
 impl GammaCorrection for Spectrum {
     fn gamma_correction(&self) -> Self {
-        Self::new(self.x.gamma_correction(), self.y.gamma_correction(), self.z.gamma_correction())
+        Self::new(self.r.gamma_correction(), self.g.gamma_correction(), self.b.gamma_correction())
     }
 }
 
 impl From<Spectrum> for [u8; 3] {
     fn from(s: Spectrum) -> Self {
-        [(s.x * 255.) as u8, (s.y * 255.) as u8, (s.z * 255.) as u8]
+        [(s.r * 255.) as u8, (s.g * 255.) as u8, (s.b * 255.) as u8]
     }
 }
 
@@ -43,6 +43,6 @@ pub trait ToHexColor {
 
 impl ToHexColor for Spectrum {
     fn to_hex_color(&self) -> u32 {
-        (((self.x * 255.) as u32) << 16) | (((self.y * 255.) as u32) << 8) | ((self.z * 255.) as u32)
+        (((self.r * 255.) as u32) << 16) | (((self.g * 255.) as u32) << 8) | ((self.b * 255.) as u32)
     }
 }

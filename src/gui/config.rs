@@ -10,4 +10,13 @@ pub const HEIGHT: u32 = 768;
 pub const FPS_LIMIT: Float = 10.;
 pub const PHAROSA: &str = "Pharosa";
 
+pub const WINDOW_OPTS: WindowOptions = WindowOptions {
+    borderless: false,
+    title: true,
+    resize: true,
+    scale: Scale::X1,
+    scale_mode: ScaleMode::AspectRatioStretch,
+    topmost: false,
+};
+
 pub const SAVE_PATH: &str = "result.png";
