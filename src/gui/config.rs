@@ -7,8 +7,9 @@ pub const SAVE_BTN: usize = 3;
 
 pub const WIDTH: u32 = 512;
 pub const HEIGHT: u32 = 384;
-pub const FPS_LIMIT: Float = 10.;
+pub const FPS_LIMIT: Float = 60.;
 pub const PHAROSA: &str = "Pharosa";
+pub const CAMERA_STEP: Float = 0.1;
 
 pub const WINDOW_OPTS: WindowOptions = WindowOptions {
     borderless: false,

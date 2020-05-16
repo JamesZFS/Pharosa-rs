@@ -1,5 +1,6 @@
 use super::*;
 use crate::primitive::texture::Texture;
+use num_traits::clamp_min;
 
 #[derive(Default, Debug, Clone)]
 pub struct Albedo;
@@ -34,6 +35,23 @@ impl SampleIntegratorDelegate for Position {
         match scene.nearest_hit(&ray) {
             None => Spectrum::black(),
             Some(Intersection(geo, _prim)) => geo.pos.into(),
+        }
+    }
+}
+
+
+#[derive(Default, Debug, Clone)]
+pub struct Shader;
+
+impl SampleIntegratorDelegate for Shader {
+    fn Li(&self, ray: Ray, scene: &Scene<impl Geometry, impl BSDF, impl Texture>, _sampler: &mut impl Sampler) -> Spectrum {
+        match scene.nearest_hit(&ray) {
+            None => scene.environ_map(&ray),
+            Some(Intersection(GeometryIntersection { normal, .. }, prim)) => {
+                let mut attenuation: Float = dot(normal, vec3(1.0, 1.0, 0.).normalize());
+                attenuation = clamp_min(attenuation, 0.2);
+                prim.material.texture.at(Point2::origin()) * attenuation
+            }
         }
     }
 }

@@ -26,7 +26,9 @@ impl<C> Camera<C> where C: CameraInner {
         }
     }
 
-    /// Sample a ray, return the world ray and its pdf
+    /// Sample a ray at **image** screen pixel (x, y), return the world ray and its pdf
+    ///
+    /// Notice: the screen coordinate y is inverse to physical coordinate!
     pub fn generate_ray(&self, x: u32, y: u32, aperture_samp: Point2f) -> (Ray, Float) {
         let (ray, pdf) = self.inner.generate_ray(x, y, aperture_samp);
         debug_assert_approx!(ray.dir.magnitude(), 1.0);
@@ -49,7 +51,7 @@ impl<C> Camera<C> where C: CameraInner {
 }
 
 pub trait CameraInner: Clone + Debug + Send + Sync + 'static {
-    /// Sample a ray, return the local ray and its pdf
+    /// Sample a ray at **image** screen pixel coordinate (x, y), return the local ray and its pdf
     fn generate_ray(&self, x: u32, y: u32, aperture_samp: Point2f) -> (Ray, Float);
 }
 

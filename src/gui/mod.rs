@@ -108,27 +108,27 @@ fn event_loop(mut window: Window,
             if let Some(key) = keys.first() {
                 if match key {
                     Key::W => {
-                        camera.translate(vec3(0., 0., 1.));
+                        camera.translate(vec3(0., CAMERA_STEP, 0.));
                         true
                     }
                     Key::A => {
-                        camera.translate(vec3(-1., 0., 0.));
+                        camera.translate(vec3(CAMERA_STEP, 0., 0.));
                         true
                     }
                     Key::S => {
-                        camera.translate(vec3(0., 0., -1.));
+                        camera.translate(vec3(0., -CAMERA_STEP, 0.));
                         true
                     }
                     Key::D => {
-                        camera.translate(vec3(1., 0., 0.));
+                        camera.translate(vec3(-CAMERA_STEP, 0., 0.));
                         true
                     }
                     Key::Up => {
-                        camera.translate(vec3(0., 1., 0.));
+                        camera.translate(vec3(0., 0., CAMERA_STEP));
                         true
                     }
                     Key::Down => {
-                        camera.translate(vec3(0., -1., 0.));
+                        camera.translate(vec3(0., 0., -CAMERA_STEP));
                         true
                     }
                     _ => false,
