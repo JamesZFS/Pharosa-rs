@@ -138,6 +138,6 @@ pub fn setup_camera() -> Camera<impl CameraInner> {
 }
 
 pub fn setup_integrator() -> impl Integrator {
-    integrator::SampleIntegrator { n_spp: 100, delegate: integrator::SmallPT { rr_depth: 5 } }
-    // integrator::SampleIntegrator { n_spp: 10, delegate: integrator::Shader::default() }
+    // integrator::SampleIntegrator { n_spp: 100, delegate: integrator::SmallPT { rr_depth: 5 } }
+    integrator::SampleIntegrator { n_spp: 10, delegate: integrator::Normal::default() }
 }

@@ -70,7 +70,7 @@ pub fn lerp<S, T>(a: S, b: S, t: Float) -> T where
 }
 
 /// To ensure performance, we could use an unsafe cell to sync data between threads
-pub(super) struct UnsafeWrapper<T>(UnsafeCell<T>);
+pub(crate) struct UnsafeWrapper<T>(UnsafeCell<T>);
 
 unsafe impl<T: Sync> Sync for UnsafeWrapper<T> {}
 
