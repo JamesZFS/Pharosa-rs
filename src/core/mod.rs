@@ -19,7 +19,7 @@ mod film;
 pub type Float = f32;
 
 // #[cfg(feature = "float64")]
-// pub type Real = f64;
+// pub type Float = f64;
 
 pub type Radf = Rad<Float>;
 pub type Degf = Deg<Float>;

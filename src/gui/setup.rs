@@ -32,14 +32,14 @@ pub fn setup_window() -> Window {
 //  };
 
 pub fn setup_scene_cornell() -> Scene<impl Geometry, impl BSDF, impl Texture> {
-    let radius = [1e5, 1e5, 1e5, 1e5, 1e5, 1e5, 16.5, 16.5, 600.];
+    let radius = [1e3, 1e3, 1e3, 1e3, 1e3, 1e3, 16.5, 16.5, 600.];
     let position = [
-        [1e5 + 1., 40.8, 81.6],
-        [-1e5 + 99., 40.8, 81.6],
-        [50., 40.8, 1e5],
-        [50., 40.8, -1e5 + 370.],
-        [50., 1e5, 81.6],
-        [50., -1e5 + 81.6, 81.6],
+        [1e3 + 1., 40.8, 81.6],
+        [-1e3 + 99., 40.8, 81.6],
+        [50., 40.8, 1e3],
+        [50., 40.8, -1e3 + 370.],
+        [50., 1e3, 81.6],
+        [50., -1e3 + 81.6, 81.6],
         [27., 16.5, 47.],
         [73., 16.5, 78.],
         [50., 681.6 - 0.27, 81.6], // Light
@@ -99,7 +99,7 @@ pub fn setup_camera_cornell() -> Camera<impl CameraInner> {
     let camera = Camera::new(
         pers,
         pt3(50., 52., 295.6),
-        pt3(50., 40., 0.),
+        pt3(50., 35., 0.),
         vec3(0., 1., 0.),
     );
     camera
@@ -138,6 +138,6 @@ pub fn setup_camera() -> Camera<impl CameraInner> {
 }
 
 pub fn setup_integrator() -> impl Integrator {
-    integrator::SampleIntegrator { n_spp: 100, delegate: integrator::SmallPT { rr_depth: 5 } }
+    integrator::SampleIntegrator { n_spp: 100, delegate: integrator::SmallPT { rr_depth: 4 } }
     // integrator::SampleIntegrator { n_spp: 10, delegate: integrator::Normal::default() }
 }

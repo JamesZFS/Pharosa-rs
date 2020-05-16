@@ -16,7 +16,6 @@ mod path_tracing;
 pub use simple::*;
 pub use path_tracing::*;
 pub use smallpt::*;
-use std::sync::{Mutex, Arc};
 
 pub trait Integrator: Debug + Clone + Send + 'static {
     /// Render the scene, store the result in `film`
@@ -41,7 +40,7 @@ impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + D
             // parallel y
             (0..height).into_par_iter().for_each(|y| unsafe {
                 let mut sampler = sampler.clone();
-                let mut film = &mut *(*film.get_raw_mut() as *mut Film); // todo: this is too ugly...
+                let film = &mut *(*film.get_raw_mut() as *mut Film); // todo: this is too ugly...
                 for x in 0..width {
                     let acc = film.at_unchecked_mut(x, y);
                     let (ray, pdf) = camera.generate_ray(x, y, sampler.next2d());

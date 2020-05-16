@@ -19,7 +19,6 @@ impl SampleIntegratorDelegate for SmallPT {
                 }
                 Some(its) => {
                     radiance += &throughput * its.emission();
-                    // break;
                     // do bsdf sampling:
                     let b_rec = its.sample_bsdf(sampler.next2d());
                     throughput *= b_rec.weight / b_rec.pdf;
@@ -46,6 +45,6 @@ impl SampleIntegratorDelegate for SmallPT {
 
 impl Default for SmallPT {
     fn default() -> Self {
-        Self { rr_depth: 5 }
+        Self { rr_depth: 4 }
     }
 }
