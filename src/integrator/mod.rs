@@ -30,13 +30,14 @@ pub struct SampleIntegrator<D: Debug + Clone> {
 impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + Debug + Clone + Send + 'static {
     fn render(&self, context: &mut Context<impl Geometry, impl BSDF, impl Texture, impl CameraInner, impl Sampler>) {
         // unpack
-        let Context { scene, camera, sampler, film, progress } = context;
+        let Context { ref scene, ref camera, sampler, film, progress, ref terminate_request } = context;
         let (height, width) = (film.height(), film.width()); // assume size not change
         *progress = 0.;
-        for y in 0..height {
-            for x in 0..width {
-                let acc = if cfg!(debug_assertions) { film.at_mut(x, y) } else { unsafe { film.at_unchecked_mut(x, y) } };
-                for spp in 0..self.n_spp {
+        for spp in 0..self.n_spp {
+            if *terminate_request { return; } // early stop when a terminate_request is pending
+            for y in 0..height {
+                for x in 0..width {
+                    let acc = if cfg!(debug_assertions) { film.at_mut(x, y) } else { unsafe { film.at_unchecked_mut(x, y) } };
                     let (ray, pdf) = camera.generate_ray(x, y, sampler.next2d());
                     let mut radiance = self.delegate.Li(ray, scene, sampler);
                     radiance /= pdf;
@@ -45,7 +46,7 @@ impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + D
                 }
             }
             // notify progress
-            *progress = y as Float / height as Float;
+            *progress = (spp + 1) as Float / self.n_spp as Float;
         }
     }
 }

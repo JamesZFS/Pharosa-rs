@@ -23,6 +23,8 @@ pub use gui::gui;
 /// All the data we need to do the rendering
 ///
 /// To maximize the performance, we use a very generic representation, though a bit awkward...
+///
+/// The `Context` can be a shared memory wrapped by a UnsafeWrapper
 pub struct Context<G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler> {
     pub scene: Scene<G, B, T>,
     pub camera: Camera<C>,
@@ -31,4 +33,6 @@ pub struct Context<G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler>
     pub film: Film,
     /// To indicate rendering progress, read by gui, written by kernel
     pub progress: Float,
+    /// Gui can set this as true to terminate the rendering
+    pub terminate_request: bool,
 }

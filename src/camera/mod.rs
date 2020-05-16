@@ -42,6 +42,10 @@ impl<C> Camera<C> where C: CameraInner {
         self.world_to_local = transform.inverse_transform()
             .unwrap_or_else(|| panic!(format!("Singular transform {:?}", transform)));
     }
+
+    pub fn translate(&mut self, translation: Vector3f) {
+        self.set_transform(Matrix4::from_translation(translation) * self.local_to_world)
+    }
 }
 
 pub trait CameraInner: Clone + Debug + Send + Sync + 'static {
