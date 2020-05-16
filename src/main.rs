@@ -25,15 +25,28 @@ fn bench_2() {
     }
 }
 
+fn test_onb() {
+    use pharosa::*;
+    let ez = vec3(0., 0., 1.);
+    let onb = onb(ez);
+    println!("{:?}", onb);
+    let v = onb * vec3(0.1, 0.2, 1.);
+    println!("{:?}", v);
+}
+
+fn sum_of_squares(input: &[i32]) -> i32 {
+    use rayon::prelude::*;
+    input.par_iter() // <-- just change that!
+        .map(|&i| i * i)
+        .sum()
+}
+
 fn main() {
     println!("Pharosa {}\n", env!("CARGO_PKG_VERSION"));
     let tic = Instant::now();
-    // bench_1();
-    // let e1 = tic.elapsed();
-    // let tic = Instant::now();
-    // bench_2();
-    // let e2 = tic.elapsed();
-    // println!("{:?} vs {:?}", e1, e2);
+    // test_sample();
     pharosa::gui();
+    // println!("{:?}", sum_of_squares(&(0..100000000).into_iter().collect::<Vec<_>>()));
+    // test_onb();
     println!("\nProgram finished in {:?}", tic.elapsed());
 }

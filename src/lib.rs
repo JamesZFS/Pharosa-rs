@@ -6,8 +6,8 @@ mod primitive;
 mod camera;
 pub mod utils;
 mod scene;
-mod sampler;
-mod integrator;
+pub mod sampler;
+pub mod integrator;
 mod gui;
 
 pub use self::core::*;

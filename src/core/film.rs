@@ -11,11 +11,12 @@ pub struct Film {
 }
 
 impl Film {
-    pub fn new(width: u32, height: u32) -> Self {
+    pub fn new(width: u32, height: u32) -> Self { Self::new_with_color(width, height, Spectrum::black()) }
+    pub fn new_with_color(width: u32, height: u32, color: Spectrum) -> Self {
         Self {
             width,
             height,
-            data: vec![Spectrum::black(); (width * height) as usize],
+            data: vec![color; (width * height) as usize],
         }
     }
     pub fn width(&self) -> u32 { self.width }

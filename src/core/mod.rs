@@ -27,6 +27,7 @@ pub type Point2f = Point2<Float>;
 pub type Point3f = Point3<Float>;
 pub type Vector2f = Vector2<Float>;
 pub type Vector3f = Vector3<Float>;
+pub type Matrix3f = Matrix3<Float>;
 pub type Matrix4f = Matrix4<Float>;
 
 #[inline(always)]
@@ -41,6 +42,14 @@ pub fn pt2<S>(x: S, y: S) -> Point2<S> {
 
 #[inline(always)]
 pub fn cross<S: BaseNum>(x: Vector3<S>, y: Vector3<S>) -> Vector3<S> { x.cross(y) }
+
+/// Get orthogonal basis transform with z-axis specified
+pub fn onb(ez: Vector3f) -> Matrix3f {
+    debug_assert_approx!(ez.magnitude(), 1.);
+    let ex = if ez.y.abs() > 0.1 { Vector3f::unit_x() } else { Vector3f::unit_y() }.cross(ez).normalize();
+    let ey = ez.cross(ex).normalize();
+    Matrix3::from_cols(ex, ey, ez)
+}
 
 pub trait TransformAny<T> {
     fn transform(&self, src: &T) -> T;
@@ -79,6 +88,7 @@ impl<T> UnsafeWrapper<T> {
     pub fn new(value: T) -> Self { Self(UnsafeCell::new(value)) }
     pub unsafe fn get(&self) -> &T { &*self.0.get() }
     pub unsafe fn get_mut(&self) -> &mut T { &mut *self.0.get() }
+    pub unsafe fn get_raw_mut(&self) -> *mut T { self.0.get() }
 }
 
 #[cfg(test)]

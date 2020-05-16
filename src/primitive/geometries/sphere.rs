@@ -83,13 +83,16 @@ mod test {
     fn has_intersect() {
         let s = Sphere::new(1.0);
         let r = Ray::new(pt3(10., 0., 0.), vec3(-1., 0., 0.));
-        assert_eq!(s.intersect(&r), Some(GeometryIntersection {
+        let mut its = s.intersect(&r).unwrap();
+        its.uv = pt2(0., 0.);
+        assert_eq!(its, GeometryIntersection {
             pos: pt3(1., 0., 0.),
             normal: vec3(1., 0., 0.),
             wi: -r.dir,
             t: 9.0,
-            side: Side::Outside
-        }));
+            side: Side::Outside,
+            uv: pt2(0., 0.)
+        });
         let r = Ray::new(pt3(0., 0., 0.), vec3(1., 1., 0.).normalize());
         let x = (2.0 as Float).sqrt() / 2.0;
         let p = pt3(x, x, 0.);

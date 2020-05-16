@@ -2,7 +2,7 @@ use super::*;
 use derive_more::*;
 use crate::sampler::cosine_on_hemisphere;
 
-#[derive(Debug, Clone, From)]          /// Simple materials
+#[derive(Debug, Clone, From)]           /// Simple materials
 pub enum Simple {
     Diffuse(Diffuse),
     Specular(Specular),
@@ -47,10 +47,9 @@ impl BSDF for Diffuse {
     /// Sample cosine on hemisphere
     fn sample(&self, its: &GeometryIntersection, samp: Point2f) -> SampleRecord {
         let samp = cosine_on_hemisphere(samp);
-        // todo: too slow
-        let basis = Basis3::look_at(its.normal, if its.normal.x.abs() > 0.1 { Vector3::unit_y() } else { Vector3::unit_x() });
+        let basis = onb(its.normal);
         SampleRecord {
-            wo: basis.rotate_vector(samp.to_vec()),
+            wo: basis * samp.to_vec(),
             weight: Spectrum::white(), // assume no attenuation
             pdf: 1., // since we just cosine-ly sampled the diffuse surface
         }
@@ -122,4 +121,29 @@ impl BSDF for Dielectric {
 #[cfg(test)]
 mod test {
     use super::*;
+    use rand::random;
+    use crate::sampler::Independent;
+    use crate::Sampler;
+    use crate::macros::*;
+
+    #[test]
+    fn diffuse_sample() {
+        let mut sampler = Independent;
+        let its = GeometryIntersection {
+            pos: pt3(1., 1., 1.),
+            normal: vec3(1., 0., 0.),
+            wi: vec3(random(), random(), random()),
+            t: random(),
+            side: Side::Outside,
+            uv: pt2(random(), random()),
+        };
+        let diffuse = Diffuse;
+        for _ in 0..10000 {
+            let rc = diffuse.sample(&its, sampler.next2d());
+            assert_eq!(rc.weight, Spectrum::uniform(1.));
+            assert_eq!(rc.pdf, 1.);
+            assert_approx!(rc.wo.magnitude(), 1.);
+            assert_ge!(dot(rc.wo, its.normal), 0.);
+        }
+    }
 }

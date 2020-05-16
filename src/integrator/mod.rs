@@ -7,6 +7,7 @@ use crate::sampler::Sampler;
 use crate::primitive::*;
 use crate::Context;
 use std::fmt::Debug;
+use rayon::prelude::*;
 
 mod simple;
 mod smallpt;
@@ -15,6 +16,7 @@ mod path_tracing;
 pub use simple::*;
 pub use path_tracing::*;
 pub use smallpt::*;
+use std::sync::{Mutex, Arc};
 
 pub trait Integrator: Debug + Clone + Send + 'static {
     /// Render the scene, store the result in `film`
@@ -27,24 +29,28 @@ pub struct SampleIntegrator<D: Debug + Clone> {
     pub delegate: D,
 }
 
-impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + Debug + Clone + Send + 'static {
+impl<D> Integrator for SampleIntegrator<D> where D: SampleIntegratorDelegate + Debug + Clone + Sync + Send + 'static {
     fn render(&self, context: &mut Context<impl Geometry, impl BSDF, impl Texture, impl CameraInner, impl Sampler>) {
         // unpack
         let Context { ref scene, ref camera, sampler, film, progress, ref terminate_request } = context;
         let (height, width) = (film.height(), film.width()); // assume size not change
         *progress = 0.;
+        let film = UnsafeWrapper::new(film); // cast to pointer, for performance purpose
         for spp in 0..self.n_spp {
             if *terminate_request { return; } // early stop when a terminate_request is pending
-            for y in 0..height {
+            // parallel y
+            (0..height).into_par_iter().for_each(|y| unsafe {
+                let mut sampler = sampler.clone();
+                let mut film = &mut *(*film.get_raw_mut() as *mut Film); // todo: this is too ugly...
                 for x in 0..width {
-                    let acc = if cfg!(debug_assertions) { film.at_mut(x, y) } else { unsafe { film.at_unchecked_mut(x, y) } };
+                    let acc = film.at_unchecked_mut(x, y);
                     let (ray, pdf) = camera.generate_ray(x, y, sampler.next2d());
-                    let mut radiance = self.delegate.Li(ray, scene, sampler);
+                    let mut radiance = self.delegate.Li(ray, scene, &mut sampler);
                     radiance /= pdf;
                     // accumulate pixel value
                     *acc = lerp(&*acc, &radiance, 1. / (spp + 1) as Float);
                 }
-            }
+            });
             // notify progress
             *progress = (spp + 1) as Float / self.n_spp as Float;
         }

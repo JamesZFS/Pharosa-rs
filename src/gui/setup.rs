@@ -95,11 +95,11 @@ pub fn setup_scene_cornell() -> Scene<impl Geometry, impl BSDF, impl Texture> {
 }
 
 pub fn setup_camera_cornell() -> Camera<impl CameraInner> {
-    let pers = camera::Perspective::new(WIDTH, HEIGHT, Deg(45.));
+    let pers = camera::Perspective::new(WIDTH, HEIGHT, Deg(30.));
     let camera = Camera::new(
         pers,
         pt3(50., 52., 295.6),
-        pt3(50., 52., 0.),
+        pt3(50., 40., 0.),
         vec3(0., 1., 0.),
     );
     camera
