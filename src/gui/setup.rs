@@ -37,7 +37,7 @@ pub fn setup_scene_cornell() -> Scene<impl Geometry, impl BSDF, impl Texture> {
         [1e5 + 1., 40.8, 81.6],
         [-1e5 + 99., 40.8, 81.6],
         [50., 40.8, 1e5],
-        [50., 40.8, -1e5 + 170.],
+        [50., 40.8, -1e5 + 370.],
         [50., 1e5, 81.6],
         [50., -1e5 + 81.6, 81.6],
         [27., 16.5, 47.],
@@ -95,12 +95,12 @@ pub fn setup_scene_cornell() -> Scene<impl Geometry, impl BSDF, impl Texture> {
 }
 
 pub fn setup_camera_cornell() -> Camera<impl CameraInner> {
-    let pers = camera::Perspective::new(WIDTH, HEIGHT, Deg(120.));
+    let pers = camera::Perspective::new(WIDTH, HEIGHT, Deg(45.));
     let camera = Camera::new(
         pers,
         pt3(50., 52., 295.6),
         pt3(50., 52., 0.),
-        vec3(0., -1., 0.),
+        vec3(0., 1., 0.),
     );
     camera
 }
@@ -138,6 +138,6 @@ pub fn setup_camera() -> Camera<impl CameraInner> {
 }
 
 pub fn setup_integrator() -> impl Integrator {
-    integrator::SampleIntegrator { n_spp: 10, delegate: integrator::SmallPT { rr_depth: 3 } } // 2.640187063s
+    integrator::SampleIntegrator { n_spp: 100, delegate: integrator::SmallPT { rr_depth: 5 } }
     // integrator::SampleIntegrator { n_spp: 10, delegate: integrator::Shader::default() }
 }

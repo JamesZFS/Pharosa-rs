@@ -9,7 +9,7 @@ pub const WIDTH: u32 = 512;
 pub const HEIGHT: u32 = 384;
 pub const FPS_LIMIT: Float = 60.;
 pub const PHAROSA: &str = "Pharosa";
-pub const CAMERA_TRANSLATION_STEP: Float = 0.1;
+pub const CAMERA_TRANSLATION_STEP: Float = 1.;
 pub const CAMERA_ROTATION_STEP: Degf = Deg(1.);
 
 pub const WINDOW_OPTS: WindowOptions = WindowOptions {
