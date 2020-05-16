@@ -14,15 +14,14 @@ pub struct Camera<C: CameraInner> {
 }
 
 impl<C> Camera<C> where C: CameraInner {
-    /// Construct a Camera.
-    ///
-    /// `transform`: a matrix to transform the camera from origin to where it should locate and look at in the world
-    pub fn new(inner: C, transform: Matrix4f) -> Self {
+    /// Construct a Camera with the observer's parameters given
+    pub fn new(inner: C, eye: Point3f, gaze: Point3f, up: Vector3f) -> Self {
+        let world_to_local = Matrix4::look_at(eye, gaze, up);
         Self {
             inner,
-            world_to_local: transform.inverse_transform()
-                .unwrap_or_else(|| panic!(format!("Singular transform {:?}", transform))),
-            local_to_world: transform,
+            world_to_local,
+            local_to_world: world_to_local.inverse_transform()
+                .unwrap_or_else(|| panic!(format!("Singular transform when initializing camera: eye = {:?} gaze = {:?} up = {:?}", eye, gaze, up))),
         }
     }
 
@@ -46,7 +45,11 @@ impl<C> Camera<C> where C: CameraInner {
     }
 
     pub fn translate(&mut self, translation: Vector3f) {
-        self.set_transform(Matrix4::from_translation(translation) * self.local_to_world)
+        self.set_transform(self.local_to_world * Matrix4::from_translation(translation))
+    }
+
+    pub fn rotate<A: Into<Radf>>(&mut self, axis: Vector3f, angle: A) {
+        self.set_transform(self.local_to_world * Matrix4::from_axis_angle(axis, angle));
     }
 }
 
@@ -67,14 +70,29 @@ mod test {
         let pers = Perspective::new(10, 10, Deg(90.));
         let camera = Camera::new(
             pers,
-            Matrix4::look_at(
-                pt3(0., 0., -1.),
-                pt3(0., 0., 0.),
-                vec3(0., 1., 0.)),
+            pt3(0., 0., -1.),
+            pt3(0., 0., 0.),
+            vec3(0., 1., 0.),
         );
         let mut samp = sampler::Fake;
         let (ray, pdf) = camera.generate_ray(5, 5, samp.next2d());
         assert_approx!(pdf, 1.0);
         assert_eq!(ray, Ray::new(pt3(0., 0., -1.), Vector3::unit_z()))
+    }
+
+    #[test]
+    fn transform() {
+        let mut camera = Camera::new(
+            Perspective::new(10, 10, Deg(90.)),
+            pt3(10., 10., 1.),
+            pt3(10., 10., 0.),
+            vec3(0., 1., 0.),
+        );
+        let mut samp = sampler::Fake;
+        let (ray, _) = camera.generate_ray(8, 8, samp.next2d());
+        camera.translate(vec3(0., 0.5, 0.));
+        let (ray2, _) = camera.generate_ray(8, 8, samp.next2d());
+        assert_eq!(ray.dir, ray2.dir);
+        assert_eq!(ray.org + vec3(0., 0.5, 0.), ray2.org);
     }
 }

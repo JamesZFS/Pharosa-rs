@@ -33,7 +33,7 @@ impl CameraInner for Perspective {
     fn generate_ray(&self, x: u32, y: u32, aperture_samp: Point2f) -> (Ray, Float) {
         debug_assert!((x as Float) < self.width && (y as Float) < self.height);
         // [0,1] -> [-0.5,0.5]
-        let (x, y) = (x as Float + (aperture_samp.x - 0.5), self.height - y as Float + 1. + (aperture_samp.y - 0.5)); // MSAA
+        let (x, y) = (x as Float + (aperture_samp.x - 0.5), self.height - y as Float + (aperture_samp.y - 0.5)); // MSAA
         let dir = vec3(
             (x / self.width - 0.5) * self.aspect,
             y / self.height - 0.5,
@@ -73,10 +73,9 @@ mod test {
         let pers = Perspective::new(WIDTH, HEIGHT, fovy);
         let camera = Camera::new(
             pers,
-            Matrix4::look_at(
-                pt3(0., 0., -4.),
-                pt3(0., 0., 0.),
-                vec3(0., 1., 0.)),
+            pt3(0., 0., -4.),
+            pt3(0., 0., 0.),
+            vec3(0., 1., 0.),
         );
         camera
     }

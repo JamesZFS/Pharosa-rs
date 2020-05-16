@@ -24,7 +24,7 @@ impl SampleIntegratorDelegate for SmallPT {
                     throughput *= b_rec.weight / b_rec.pdf;
 
                     let P = throughput.max();
-                    if P < 0.01 || depth >= self.rr_depth { // R.R.
+                    if P < 1e-3 || depth >= self.rr_depth { // R.R.
                         if sampler.next() < P { // continue
                             throughput /= P;
                         } else { // terminate

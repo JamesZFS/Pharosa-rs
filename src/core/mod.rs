@@ -39,6 +39,9 @@ pub fn pt2<S>(x: S, y: S) -> Point2<S> {
     Point2::new(x, y)
 }
 
+#[inline(always)]
+pub fn cross<S: BaseNum>(x: Vector3<S>, y: Vector3<S>) -> Vector3<S> { x.cross(y) }
+
 pub trait TransformAny<T> {
     fn transform(&self, src: &T) -> T;
 }

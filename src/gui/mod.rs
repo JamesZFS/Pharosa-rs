@@ -14,8 +14,8 @@ use setup::*;
 pub fn gui() {
     let window = setup_window();
     let context = Arc::new(UnsafeWrapper::new(Context {
-        scene: setup_scene(),
-        camera: setup_camera(),
+        scene: setup_scene_cornell(),
+        camera: setup_camera_cornell(),
         sampler: sampler::Independent,
         film: Film::new(WIDTH, HEIGHT),
         progress: 0.,
@@ -105,34 +105,59 @@ fn event_loop(mut window: Window,
 
         // process keyboard events
         window.get_keys().map(|keys| {
-            if let Some(key) = keys.first() {
+            for key in keys {
                 if match key {
-                    Key::W => {
-                        camera.translate(vec3(0., CAMERA_STEP, 0.));
+                    Key::W => { // move front, notice camera's z-axis points towards the user
+                        camera.translate(vec3(0., 0., -CAMERA_TRANSLATION_STEP));
                         true
                     }
-                    Key::A => {
-                        camera.translate(vec3(CAMERA_STEP, 0., 0.));
+                    Key::S => { // move back
+                        camera.translate(vec3(0., 0., CAMERA_TRANSLATION_STEP));
                         true
                     }
-                    Key::S => {
-                        camera.translate(vec3(0., -CAMERA_STEP, 0.));
+                    Key::A => { // move left, notice camera's x-axis points towards screen's right
+                        camera.translate(vec3(-CAMERA_TRANSLATION_STEP, 0., 0.));
                         true
                     }
-                    Key::D => {
-                        camera.translate(vec3(-CAMERA_STEP, 0., 0.));
+                    Key::D => { // move right
+                        camera.translate(vec3(CAMERA_TRANSLATION_STEP, 0., 0.));
                         true
                     }
-                    Key::Up => {
-                        camera.translate(vec3(0., 0., CAMERA_STEP));
+                    Key::Space => { // move up
+                        camera.translate(vec3(0., CAMERA_TRANSLATION_STEP, 0.));
                         true
                     }
-                    Key::Down => {
-                        camera.translate(vec3(0., 0., -CAMERA_STEP));
+                    Key::LeftShift | Key::RightShift => { // move down
+                        camera.translate(vec3(0., -CAMERA_TRANSLATION_STEP, 0.));
+                        true
+                    }
+                    Key::Left => { // rotate along y-axis
+                        camera.rotate(Vector3::unit_y(), CAMERA_ROTATION_STEP);
+                        true
+                    }
+                    Key::Right => { // rotate along y-axis
+                        camera.rotate(Vector3::unit_y(), -CAMERA_ROTATION_STEP);
+                        true
+                    }
+                    Key::Up => { // rotate along x-axis
+                        camera.rotate(Vector3::unit_x(), CAMERA_ROTATION_STEP);
+                        true
+                    }
+                    Key::Down => { // rotate along x-axis
+                        camera.rotate(Vector3::unit_x(), -CAMERA_ROTATION_STEP);
+                        true
+                    }
+                    Key::Q => { // rotate along z-axis
+                        camera.rotate(Vector3::unit_z(), CAMERA_ROTATION_STEP);
+                        true
+                    }
+                    Key::E => { // rotate along x-axis
+                        camera.rotate(Vector3::unit_z(), -CAMERA_ROTATION_STEP);
                         true
                     }
                     _ => false,
-                } { // notify kernel to advance
+                }
+                { // notify kernel to advance
                     *terminate_request = true;
                     let (has_cmd, cmd_type) = &*kernel_command;
                     *cmd_type.lock().unwrap() = KernelCommand::Restart;

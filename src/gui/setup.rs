@@ -95,13 +95,12 @@ pub fn setup_scene_cornell() -> Scene<impl Geometry, impl BSDF, impl Texture> {
 }
 
 pub fn setup_camera_cornell() -> Camera<impl CameraInner> {
-    let pers = camera::Perspective::new(WIDTH, HEIGHT, Deg(40.));
+    let pers = camera::Perspective::new(WIDTH, HEIGHT, Deg(120.));
     let camera = Camera::new(
         pers,
-        Matrix4::look_at(
-            pt3(50., 52., 295.6),
-            pt3(50., 52., 0.),
-            vec3(0., -1., 0.)),
+        pt3(50., 52., 295.6),
+        pt3(50., 52., 0.),
+        vec3(0., -1., 0.),
     );
     camera
 }
@@ -109,19 +108,19 @@ pub fn setup_camera_cornell() -> Camera<impl CameraInner> {
 pub fn setup_scene() -> Scene<impl Geometry, impl BSDF, impl Texture> {
     let mut scene = Scene::new();
     scene.push(Primitive::new(
-        Sphere::new(0.2),
+        Sphere::new(0.3),
         Arc::new(Material { bsdf: bsdf::Simple::default(), texture: texture::Uniform(Spectrum::new(1., 0., 0.)), emission: Spectrum::new(0.5, 0.2, 0.5) }),
         Matrix4::from_translation(vec3(3., 0., 0.))));
     scene.push(Primitive::new(
-        Sphere::new(0.2),
+        Sphere::new(0.3),
         Arc::new(Material { bsdf: bsdf::Simple::default(), texture: texture::Uniform(Spectrum::new(0., 1., 0.)), emission: Spectrum::new(0.5, 0.2, 0.5) }),
         Matrix4::from_translation(vec3(0., 3., 0.))));
     scene.push(Primitive::new(
-        Sphere::new(0.2),
+        Sphere::new(0.3),
         Arc::new(Material { bsdf: bsdf::Simple::default(), texture: texture::Uniform(Spectrum::new(0., 0., 1.)), emission: Spectrum::new(0.2, 0.5, 0.2) }),
         Matrix4::from_translation(vec3(0., 0., 3.))));
     scene.push(Primitive::new(
-        Sphere::new(1.0),
+        Sphere::new(0.1),
         Arc::new(Material { bsdf: bsdf::Simple::default(), texture: texture::Uniform(Spectrum::new(1., 1., 1.)), emission: Spectrum::new(0.5, 0.2, 0.5) }),
         Matrix4::from_translation(vec3(0., 0., 0.))));
     scene
@@ -131,15 +130,14 @@ pub fn setup_camera() -> Camera<impl CameraInner> {
     let pers = camera::Perspective::new(WIDTH, HEIGHT, Deg(90.));
     let camera = Camera::new(
         pers,
-        Matrix4::look_at(
-            pt3(0., 0., -4.),
+            pt3(0., 0., -2.),
             pt3(0., 0., 0.),
-            vec3(0., 1., 0.)),
+            vec3(0., 1., 0.),
     );
     camera
 }
 
 pub fn setup_integrator() -> impl Integrator {
-    // integrator::SampleIntegrator { n_spp: 10, delegate: integrator::SmallPT { rr_depth: 5 } } // 2.640187063s
-    integrator::SampleIntegrator { n_spp: 10, delegate: integrator::Shader::default() }
+    integrator::SampleIntegrator { n_spp: 10, delegate: integrator::SmallPT { rr_depth: 3 } } // 2.640187063s
+    // integrator::SampleIntegrator { n_spp: 10, delegate: integrator::Shader::default() }
 }
