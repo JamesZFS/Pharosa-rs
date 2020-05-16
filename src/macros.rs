@@ -1,6 +1,6 @@
 pub use more_asserts::*;
 
-pub const APPROX_TOLERANCE: f64 = 1e-5;
+pub const APPROX_TOLERANCE: f64 = 1e-4;
 
 #[macro_export]
 macro_rules! assert_approx {
