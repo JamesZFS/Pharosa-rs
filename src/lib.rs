@@ -17,9 +17,9 @@ pub use primitive::*;
 pub use integrator::{Integrator, SampleIntegrator};
 pub use sampler::Sampler;
 pub use gui::gui;
-use std::sync::{RwLock, Arc};
 
-#[derive(Debug, Clone)]
+
+#[derive(Debug)]
 /// All the data we need to do the rendering
 ///
 /// To maximize the performance, we use a very generic representation, though a bit awkward...
@@ -28,7 +28,7 @@ pub struct Context<G: Geometry, B: BSDF, T: Texture, C: CameraInner, S: Sampler>
     pub camera: Camera<C>,
     pub sampler: S,
     /// `film` is read by gui thread, written by kernel thread
-    pub film: Arc<RwLock<Film>>,
+    pub film: Film,
     /// To indicate rendering progress, read by gui, written by kernel
-    pub progress: Arc<RwLock<Float>>,
+    pub progress: Float,
 }

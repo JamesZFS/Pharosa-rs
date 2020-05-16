@@ -7,6 +7,7 @@ pub use ray::Ray;
 pub use spectrum::Spectrum;
 
 use std::ops::{Add, Sub, Mul};
+use std::cell::UnsafeCell;
 
 mod ray;
 mod intersection;
@@ -60,4 +61,15 @@ impl TransformAny<Vector3f> for Matrix4f {
 #[inline]
 pub fn lerp<S>(a: S, b: S, t: Float) -> S where S: Copy + Add<S, Output=S> + Sub<S, Output=S> + Mul<Float, Output=S> {
     a + (b - a) * t
+}
+
+/// To ensure performance, we could use an unsafe cell to sync data between threads
+pub struct UnsafeWrapper<T>(UnsafeCell<T>);
+
+unsafe impl<T: Sync> Sync for UnsafeWrapper<T> {}
+
+impl<T> UnsafeWrapper<T> {
+    pub fn new(value: T) -> Self { Self(UnsafeCell::new(value)) }
+    pub unsafe fn get(&self) -> &T { &*self.0.get() }
+    pub unsafe fn get_mut(&self) -> &mut T { &mut *self.0.get() }
 }

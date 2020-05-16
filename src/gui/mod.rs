@@ -1,7 +1,7 @@
 use crate::*;
 use minifb::*;
 use std::time::{Duration, Instant};
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use crate::utils::{ToHexColor, ToImageBuffer, GammaCorrection};
 use std::thread::spawn;
@@ -12,37 +12,44 @@ use config::*;
 
 pub fn gui() {
     let window = setup_window();
-    let context = Context {
+    let context = Arc::new(UnsafeWrapper::new(Context {
         scene: setup_scene(),
         camera: setup_camera(),
         sampler: sampler::Independent,
-        film: Arc::new(RwLock::new(Film::new(WIDTH, HEIGHT))),
-        progress: Arc::new(Default::default()),
-    };
+        film: Film::new(WIDTH, HEIGHT),
+        progress: Default::default(),
+    }));
     let integrator = setup_integrator();
     event_loop(window, context, integrator);
 }
 
-fn event_loop(mut window: Window, mut context: Context<impl Geometry, impl BSDF, impl Texture, impl CameraInner, impl Sampler>, integrator: impl Integrator) {
+fn event_loop(mut window: Window,
+              context: Arc<UnsafeWrapper<Context<impl Geometry, impl BSDF, impl Texture, impl CameraInner, impl Sampler>>>,
+              integrator: impl Integrator) {
+    // unsafe get handlers
+    let (film, camera, progress) = unsafe {
+        let Context { film, camera, progress, .. } = context.get_mut();
+        (film, camera, progress)
+    };
     // buffer for the window to display
-    let mut buffer = Vec::with_capacity(context.film.read().unwrap().size());
+    let mut buffer = Vec::with_capacity(film.size());
     window.set_title(PHAROSA);
 
-    let progress = context.progress.clone();
     let kernel_is_done = Arc::new(AtomicBool::new(false));
-    let film = context.film.clone();
     let kernel;
     { // spawn the kernel thread
         let kernel_is_done = kernel_is_done.clone();
+        let context = context.clone();
         // do rendering in 'kernel' thread
         kernel = spawn(move || {
             println!("Kernel started.");
+            let context = unsafe { context.get_mut() };
             #[cfg(debug_assertions)] {
                 println!("{:#?}", context);
                 println!("{:#?}", integrator);
             }
             let tic = Instant::now();
-            integrator.render(&mut context);
+            integrator.render(context);
             println!("Kernel finished in {:?}", tic.elapsed());
             kernel_is_done.store(true, Ordering::Relaxed);
         });
@@ -52,11 +59,11 @@ fn event_loop(mut window: Window, mut context: Context<impl Geometry, impl BSDF,
         if kernel_is_done.load(Ordering::Relaxed) {
             window.set_title(&format!("{} (done)", PHAROSA));
         } else {
-            window.set_title(&format!("{} (rendering {:.1}% ...)", PHAROSA, *progress.read().unwrap() * 100.));
+            window.set_title(&format!("{} (rendering {:.1}% ...)", PHAROSA, *progress * 100.));
         }
 
         // refresh display
-        update_buffer(&mut buffer, &film);
+        update_buffer(&mut buffer, film);
         window.update_with_buffer(&buffer, WIDTH as usize, HEIGHT as usize).unwrap();
 
         // process menu events
@@ -67,8 +74,25 @@ fn event_loop(mut window: Window, mut context: Context<impl Geometry, impl BSDF,
                     println!("Start clicked!");
                 }
                 PAUSE_BTN => unimplemented!(),
-                SAVE_BTN => save(&film),
+                SAVE_BTN => save(film),
                 _ => unreachable!()
+            }
+        });
+
+        // process keyboard events
+        window.get_keys().map(|keys| {
+            for t in keys {
+                match t {
+                    Key::W => {
+                        println!("holding w!");
+                        let transform = Matrix4::from_translation(vec3(1., 0., 0.)) * camera.transform();
+                        camera.set_transform(transform);
+                    }
+                    Key::A => println!("holding a!"),
+                    Key::S => println!("holding s!"),
+                    Key::D => println!("holding d!"),
+                    _ => {}
+                }
             }
         });
     }
@@ -76,13 +100,13 @@ fn event_loop(mut window: Window, mut context: Context<impl Geometry, impl BSDF,
     kernel.join().unwrap();
 }
 
-fn update_buffer(buffer: &mut Vec<u32>, film: &Arc<RwLock<Film>>) {
+fn update_buffer(buffer: &mut Vec<u32>, film: &Film) {
     buffer.clear();
-    buffer.extend(film.read().unwrap().to_raw().iter().map(|s| s.gamma_correction().to_hex_color()));
+    buffer.extend(film.to_raw().iter().map(|s| s.gamma_correction().to_hex_color()));
 }
 
-fn save(film: &Arc<RwLock<Film>>) {
-    film.read().unwrap().to_image_buffer().save(SAVE_PATH).unwrap();
+fn save(film: &Film) {
+    film.to_image_buffer().save(SAVE_PATH).unwrap();
     println!("Result saved to '{}'", SAVE_PATH);
 }
 
@@ -180,7 +204,7 @@ fn setup_scene() -> Scene<impl Geometry, impl BSDF, impl Texture> {
                 texture: texture::Uniform(Spectrum::new(color[i][0], color[i][1], color[i][2])),
                 emission: Spectrum::new(emission[i][0], emission[i][1], emission[i][2]),
             }),
-            Matrix4::from_translation(position[i].into())
+            Matrix4::from_translation(position[i].into()),
         ))
     };
     scene
@@ -199,6 +223,6 @@ fn setup_camera() -> Camera<impl CameraInner> {
 }
 
 fn setup_integrator() -> impl Integrator {
-    // integrator::SampleIntegrator { n_spp: 100, delegate: integrator::SmallPT { rr_depth: 5 } }
-    integrator::SampleIntegrator { n_spp: 1, delegate: integrator::Albedo::default() }
+    integrator::SampleIntegrator { n_spp: 1, delegate: integrator::SmallPT { rr_depth: 5 } } // 2.640187063s
+    // integrator::SampleIntegrator { n_spp: 1, delegate: integrator::Albedo::default() }
 }

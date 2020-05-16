@@ -33,6 +33,10 @@ impl<C> Camera<C> where C: CameraInner {
         (self.local_to_world.transform(&ray), pdf)
     }
 
+    pub fn transform(&self) -> Matrix4f {
+        self.local_to_world
+    }
+
     pub fn set_transform(&mut self, transform: Matrix4f) {
         self.local_to_world = transform;
         self.world_to_local = transform.inverse_transform()
